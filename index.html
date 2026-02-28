@@ -1999,27 +1999,28 @@
       updateStats(); updateProgress();
     }
 
+    // ★ 핵심: Sheets 데이터 적용 여부 판정
+    // lastModified 없는 Sheets 데이터 = 다른 기기에서 온 최신 데이터로 신뢰
+    function shouldUseRemote(remote, local) {
+      if (!remote) return false;
+      if (!remote.lastModified) return true;           // Sheets에 타임스탬프 없음 → Sheets 신뢰
+      if (!local._localModified) return true;          // 로컬에 타임스탬프 없음 → Sheets 신뢰
+      const rt = new Date(remote.lastModified.replace(' ', 'T') + '+09:00');
+      const lt = new Date(local._localModified);
+      return rt >= lt;                                  // Sheets가 같거나 최신 → Sheets 신뢰
+    }
+
     async function loadPage(date) {
-      // 1) localStorage에서 즉시 로드
       const local = loadLocal(date);
       applyData(local);
-
-      // 2) Sheets에서 pull (비동기) - 타임스탬프 비교 후 최신 데이터 사용
       const remote = await pullFromSheets(date);
-      if (remote) {
-        const remoteTime = remote.lastModified
-          ? new Date(remote.lastModified.replace(' ', 'T') + '+09:00')
-          : new Date(0);
-        const localTime = local._localModified ? new Date(local._localModified) : new Date(0);
-        if (remoteTime >= localTime) {
-          // Sheets가 더 최신 → Sheets 데이터 사용
-          saveLocal(date, remote);
-          applyData(remote);
-        } else {
-          // 로컬이 더 최신 → 로컬 데이터를 Sheets에 push
-          clearTimeout(pendingPush);
-          pushToSheets(date, local);
-        }
+      if (shouldUseRemote(remote, local)) {
+        saveLocal(date, remote);
+        applyData(remote);
+      } else if (remote) {
+        // 로컬이 더 최신 → 로컬을 Sheets에 push
+        clearTimeout(pendingPush);
+        pushToSheets(date, local);
       }
     }
 
@@ -2133,82 +2134,63 @@
       showToast('초기화되었습니다');
     });
 
-    // 🔄 수동 동기화 — sync badge 클릭 (타임스탬프 비교 기반)
+    // 🔄 수동 동기화 — sync badge 클릭
     document.getElementById('sync-badge').addEventListener('click', async () => {
       if (!scriptUrl) { showToast('먼저 Google Sheets를 연결하세요 (⚙️)'); return; }
       showToast('🔄 동기화 중...');
       const local = loadLocal(currentDate);
       const remote = await pullFromSheets(currentDate);
-      if (remote) {
-        const remoteTime = remote.lastModified
-          ? new Date(remote.lastModified.replace(' ', 'T') + '+09:00') : new Date(0);
-        const localTime = local._localModified ? new Date(local._localModified) : new Date(0);
-        if (remoteTime >= localTime) {
-          saveLocal(currentDate, remote); applyData(remote); updateStats(); updateProgress();
-          showToast(`✓ 동기화 완료! (${remote.lastModified || 'Sheets 최신'})`);
-        } else {
-          clearTimeout(pendingPush);
-          const data = collectData();
-          data._localModified = local._localModified;
-          pushToSheets(currentDate, data);
-          showToast('📤 로컬 최신 데이터를 Sheets에 업로드했습니다');
-        }
+      if (shouldUseRemote(remote, local)) {
+        saveLocal(currentDate, remote); applyData(remote); updateStats(); updateProgress();
+        showToast('✓ Sheets 최신 데이터로 동기화됨');
+      } else if (remote) {
+        const data = collectData();
+        data._localModified = local._localModified;
+        clearTimeout(pendingPush);
+        pushToSheets(currentDate, data);
+        showToast('📤 로컬 최신 데이터를 Sheets에 업로드');
       } else {
-        showToast('✓ Sheets에 이 날짜 데이터 없음 (로컬 유지)');
+        showToast('✓ 이 날짜 Sheets 데이터 없음 (로컬 유지)');
       }
     });
 
-    // ⏱️ 적응형 자동 동기화
-    // - 최근 10분 내 입력 있음(활성): 30초마다 poll → 다른 기기 변경사항 빠르게 반영
-    // - 입력 없음(휴식): 5분마다 poll
+    // ⏱️ 적응형 자동 동기화 (활성: 30초 / 휴식: 5분)
     let lastAutoPull = 0;
     setInterval(async () => {
       if (!scriptUrl || isSyncing) return;
       const now = Date.now();
-      const isActive = (now - lastLocalActivity) < 10 * 60 * 1000; // 10분 내 활동
-      const interval = isActive ? 30 * 1000 : 5 * 60 * 1000;      // 활성: 30s / 휴식: 5min
+      const isActive = (now - lastLocalActivity) < 10 * 60 * 1000;
+      const interval = isActive ? 30 * 1000 : 5 * 60 * 1000;
       if ((now - lastAutoPull) < interval) return;
       lastAutoPull = now;
-
-      const local = loadLocal(currentDate);
-      const remote = await pullFromSheets(currentDate, true); // quiet=true (상태바 변경 없음)
-      if (remote) {
-        const remoteTime = remote.lastModified
-          ? new Date(remote.lastModified.replace(' ', 'T') + '+09:00') : new Date(0);
-        const localTime = local._localModified ? new Date(local._localModified) : new Date(0);
-        if (remoteTime > localTime) {
-          saveLocal(currentDate, remote);
-          applyData(remote); updateStats(); updateProgress();
-          setSyncStatus('ok', '✓ 동기화됨');
-        }
-      }
-    }, 30 * 1000); // 30초마다 체크 (실제 pull 빈도는 활성/휴식 상태에 따라 결정)
-
-    // 📲 모바일에서 앱으로 돌아올 때 자동 동기화
-    // (브라우저가 페이지를 메모리에서 복원할 때 loadPage가 재실행되지 않는 문제를 해결)
-    async function syncOnFocus() {
-      if (!scriptUrl) return;
-      lastAutoPull = 0; // 강제로 즉시 pull 허용
       const local = loadLocal(currentDate);
       const remote = await pullFromSheets(currentDate, true);
-      if (remote) {
-        const remoteTime = remote.lastModified
-          ? new Date(remote.lastModified.replace(' ', 'T') + '+09:00') : new Date(0);
-        const localTime = local._localModified ? new Date(local._localModified) : new Date(0);
-        if (remoteTime > localTime) {
-          saveLocal(currentDate, remote);
-          applyData(remote); updateStats(); updateProgress();
-          setSyncStatus('ok', '✓ 동기화됨');
-        }
+      if (shouldUseRemote(remote, local)) {
+        saveLocal(currentDate, remote);
+        applyData(remote); updateStats(); updateProgress();
+        setSyncStatus('ok', '✓ 동기화됨');
+      }
+    }, 30 * 1000);
+
+    // 📲 모바일에서 앱으로 돌아올 때 자동 동기화
+    async function syncOnFocus() {
+      if (!scriptUrl) return;
+      lastAutoPull = 0;
+      const local = loadLocal(currentDate);
+      const remote = await pullFromSheets(currentDate, true);
+      if (shouldUseRemote(remote, local)) {
+        saveLocal(currentDate, remote);
+        applyData(remote); updateStats(); updateProgress();
+        setSyncStatus('ok', '✓ 동기화됨');
       }
     }
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') syncOnFocus();
     });
     window.addEventListener('pageshow', (e) => {
-      if (e.persisted) syncOnFocus(); // 뒤로가기/앱 전환 복귀 시
+      if (e.persisted) syncOnFocus();
     });
-    window.addEventListener('focus', () => syncOnFocus()); // 탭 포커스 복귀 시
+    window.addEventListener('focus', () => syncOnFocus());
 
     /* Settings btn → handled by openSettingsModal() below */
 
