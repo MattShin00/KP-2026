@@ -1890,27 +1890,17 @@
     /* ============================================================
        GOOGLE SHEETS SYNC
     ============================================================ */
-    async function pullFromSheets(date) {
+    async function pullFromSheets(date, quiet) {
       if (!scriptUrl) return null;
       try {
-        setSyncStatus('busy', '동기화 중…');
+        if (!quiet) setSyncStatus('busy', '동기화 중…');
         const url = `${scriptUrl}?date=${date}&_=${Date.now()}`;
         const res = await fetch(url, { method: 'GET' });
         const json = await res.json();
-        if (json.error) {
-          showToast('❌ API 오류: ' + json.error);
-          setSyncStatus('off', '⚡ 오프라인');
-          return null;
-        }
-        if (!json.exists) {
-          showToast(`📋 날짜 ${date} 데이터 없음 (Sheets에 미존재)`);
-          setSyncStatus('ok', '✓ 동기화됨');
-          return null;
-        }
-        setSyncStatus('ok', '✓ 동기화됨');
+        if (json.error || !json.exists) { setSyncStatus('ok', '✓ 연결됨'); return null; }
+        setSyncStatus('ok', '✓ 연결됨');
         return json;
       } catch (e) {
-        showToast('❌ 연결 오류: ' + e.message);
         setSyncStatus('off', '⚡ 오프라인');
         return null;
       }
@@ -2014,12 +2004,22 @@
       const local = loadLocal(date);
       applyData(local);
 
-      // 2) Sheets에서 pull (비동기)
+      // 2) Sheets에서 pull (비동기) - 타임스탬프 비교 후 최신 데이터 사용
       const remote = await pullFromSheets(date);
       if (remote) {
-        // Sheets 데이터가 있으면 덮어씀 + localStorage 업데이트
-        saveLocal(date, remote);
-        applyData(remote);
+        const remoteTime = remote.lastModified
+          ? new Date(remote.lastModified.replace(' ', 'T') + '+09:00')
+          : new Date(0);
+        const localTime = local._localModified ? new Date(local._localModified) : new Date(0);
+        if (remoteTime >= localTime) {
+          // Sheets가 더 최신 → Sheets 데이터 사용
+          saveLocal(date, remote);
+          applyData(remote);
+        } else {
+          // 로컬이 더 최신 → 로컬 데이터를 Sheets에 push
+          clearTimeout(pendingPush);
+          pushToSheets(date, local);
+        }
       }
     }
 
@@ -2039,13 +2039,16 @@
       return d;
     }
 
+    let lastLocalActivity = 0; // 마지막 입력 시각 (적응형 폴링 사용)
+
     function scheduleSave() {
       const date = currentDate;
       const data = collectData();
+      data._localModified = new Date().toISOString();
+      lastLocalActivity = Date.now();
       saveLocal(date, data);
-      // Debounced push to Sheets (3초 후)
       clearTimeout(pendingPush);
-      pendingPush = setTimeout(() => pushToSheets(date, data), 3000);
+      pendingPush = setTimeout(() => pushToSheets(date, data), 1000); // 1초 디바운스 (즐시 push)
     }
 
     /* ============================================================
@@ -2130,23 +2133,56 @@
       showToast('초기화되었습니다');
     });
 
-    // 🔄 수동 동기화 — sync badge 클릭
+    // 🔄 수동 동기화 — sync badge 클릭 (타임스탬프 비교 기반)
     document.getElementById('sync-badge').addEventListener('click', async () => {
       if (!scriptUrl) { showToast('먼저 Google Sheets를 연결하세요 (⚙️)'); return; }
-      const data = collectData(); saveLocal(currentDate, data);
-      clearTimeout(pendingPush);
       showToast('🔄 동기화 중...');
+      const local = loadLocal(currentDate);
       const remote = await pullFromSheets(currentDate);
-      if (remote) { saveLocal(currentDate, remote); applyData(remote); updateStats(); updateProgress(); showToast('✓ 동기화 완료!'); }
-      else { showToast('✓ 최신 상태입니다'); }
+      if (remote) {
+        const remoteTime = remote.lastModified
+          ? new Date(remote.lastModified.replace(' ', 'T') + '+09:00') : new Date(0);
+        const localTime = local._localModified ? new Date(local._localModified) : new Date(0);
+        if (remoteTime >= localTime) {
+          saveLocal(currentDate, remote); applyData(remote); updateStats(); updateProgress();
+          showToast(`✓ 동기화 완료! (${remote.lastModified || 'Sheets 최신'})`);
+        } else {
+          clearTimeout(pendingPush);
+          const data = collectData();
+          data._localModified = local._localModified;
+          pushToSheets(currentDate, data);
+          showToast('📤 로컬 최신 데이터를 Sheets에 업로드했습니다');
+        }
+      } else {
+        showToast('✓ Sheets에 이 날짜 데이터 없음 (로컬 유지)');
+      }
     });
 
-    // ⏱️ 3분마다 자동 동기화
+    // ⏱️ 적응형 자동 동기화
+    // - 최근 10분 내 입력 있음(활성): 30초마다 poll → 다른 기기 변경사항 빠르게 반영
+    // - 입력 없음(휴식): 5분마다 poll
+    let lastAutoPull = 0;
     setInterval(async () => {
       if (!scriptUrl || isSyncing) return;
-      const remote = await pullFromSheets(currentDate);
-      if (remote) { saveLocal(currentDate, remote); applyData(remote); updateStats(); updateProgress(); }
-    }, 3 * 60 * 1000);
+      const now = Date.now();
+      const isActive = (now - lastLocalActivity) < 10 * 60 * 1000; // 10분 내 활동
+      const interval = isActive ? 30 * 1000 : 5 * 60 * 1000;      // 활성: 30s / 휴식: 5min
+      if ((now - lastAutoPull) < interval) return;
+      lastAutoPull = now;
+
+      const local = loadLocal(currentDate);
+      const remote = await pullFromSheets(currentDate, true); // quiet=true (상태바 변경 없음)
+      if (remote) {
+        const remoteTime = remote.lastModified
+          ? new Date(remote.lastModified.replace(' ', 'T') + '+09:00') : new Date(0);
+        const localTime = local._localModified ? new Date(local._localModified) : new Date(0);
+        if (remoteTime > localTime) {
+          saveLocal(currentDate, remote);
+          applyData(remote); updateStats(); updateProgress();
+          setSyncStatus('ok', '✓ 동기화됨');
+        }
+      }
+    }, 30 * 1000); // 30초마다 체크 (실제 pull 빈도는 활성/휴식 상태에 따라 결정)
 
     /* Settings btn → handled by openSettingsModal() below */
 
