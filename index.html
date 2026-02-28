@@ -1999,15 +1999,18 @@
       updateStats(); updateProgress();
     }
 
-    // ★ 핵심: Sheets 데이터 적용 여부 판정
-    // lastModified 없는 Sheets 데이터 = 다른 기기에서 온 최신 데이터로 신뢰
+    // ★ Sheets 데이터 사용 여부 판정 (타임스탬프 기반)
     function shouldUseRemote(remote, local) {
       if (!remote) return false;
-      if (!remote.lastModified) return true;           // Sheets에 타임스탬프 없음 → Sheets 신뢰
-      if (!local._localModified) return true;          // 로컬에 타임스탬프 없음 → Sheets 신뢰
+      const hasR = !!remote.lastModified;
+      const hasL = !!local._localModified;
+      if (!hasR && !hasL) return true;   // 둘 다 타임스탬프 없음 → Sheets 신뢰 (초기 로드)
+      if (hasR && !hasL) return true;   // Sheets만 타임스탬프 있음 → Sheets 신뢰
+      if (!hasR && hasL) return false;  // 로컬만 타임스탬프 있음 → 로컬 신뢰 (★ 핵심 수정)
+      // 둘 다 타임스탬프 있음 → 최신 비교
       const rt = new Date(remote.lastModified.replace(' ', 'T') + '+09:00');
       const lt = new Date(local._localModified);
-      return rt >= lt;                                  // Sheets가 같거나 최신 → Sheets 신뢰
+      return rt >= lt;
     }
 
     async function loadPage(date) {
