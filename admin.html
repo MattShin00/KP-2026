@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f0c04a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>King's Planner - 관리자</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    /* ===========================  CSS VARIABLES  =========================== */
+    :root {
+      --bg: #0d0f1a;
+      --surface: #141728;
+      --surface2: #1c2035;
+      --surface3: #222640;
+      --border: rgba(255, 255, 255, 0.07);
+      --border-hover: rgba(255, 255, 255, 0.15);
+      --accent: #f0c04a;
+      --accent2: #e8834a;
+      --text: #e8eaf0;
+      --text-muted: #7a7f9a;
+      --text-dim: #4a4e6a;
+      --glass: rgba(255, 255, 255, 0.04);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.3);
+      --radius: 14px;
+      --radius-sm: 8px;
+      --sync-ok: #4ade80;
+      --sync-busy: #f0c04a;
+      --sync-off: #7a7f9a;
+    }
+
+    body.white-mode {
+      --bg: #f5f5f0;
+      --surface: #fff;
+      --surface2: #f0ede8;
+      --surface3: #e8e4dc;
+      --border: rgba(0, 0, 0, 0.09);
+      --border-hover: rgba(0, 0, 0, 0.18);
+      --text: #1a1c28;
+      --text-muted: #6b6f88;
+      --text-dim: #a0a4b8;
+      --glass: rgba(0, 0, 0, 0.03);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 14px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      background-image: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(240, 192, 74, .06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(232, 131, 74, .05) 0%, transparent 50%);
+      transition: background-color .3s;
+    }
+
+    body.white-mode {
+      background-image: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(240, 192, 74, .1) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(232, 131, 74, .07) 0%, transparent 50%);
+    }
+
+    /* ===========================  SETUP SCREEN  =========================== */
+    #setup-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .setup-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .setup-logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .setup-card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    .setup-card p {
+      font-size: .82rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 18px;
+    }
+
+    .setup-steps {
+      list-style: none;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .setup-steps li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: .8rem;
+      line-height: 1.6;
+    }
+
+    .step-num {
+      background: var(--accent);
+      color: #000;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: .75rem;
+    }
+
+    .setup-input-wrap {
+      margin-bottom: 14px;
+    }
+
+    .setup-input-wrap input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: .82rem;
+      outline: none;
+    }
+
+    .setup-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .setup-btn {
+      padding: 10px 22px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: .82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .setup-btn.primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .setup-btn.primary:hover {
+      opacity: .85;
+    }
+
+    .setup-msg {
+      font-size: .78rem;
+      min-height: 18px;
+      margin-bottom: 8px;
+    }
+
+    .setup-msg.ok {
+      color: #4ade80;
+    }
+
+    .setup-msg.err {
+      color: #f87171;
+    }
+
+    .setup-skip {
+      font-size: .75rem;
+      color: var(--text-dim);
+      cursor: pointer;
+    }
+
+    .setup-skip a {
+      color: var(--text-muted);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* ===========================  APP CONTAINER  =========================== */
+    .app-container {
+      display: none;
+      min-height: 100vh;
+    }
+
+    /* ===========================  HEADER  =========================== */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 18px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      font-size: .75rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    .brand-title h1 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -.02em;
+    }
+
+    .brand-title span {
+      font-size: .65rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sync-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      font-size: .7rem;
+      color: var(--text-muted);
+    }
+
+    .sync-badge.no-sync {
+      opacity: .4;
+    }
+
+    .sync-badge.ok {
+      border-color: rgba(74, 222, 128, .3);
+    }
+
+    .sync-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--sync-off);
+    }
+
+    .sync-badge.ok .sync-dot {
+      background: var(--sync-ok);
+    }
+
+    .sync-badge.busy .sync-dot {
+      background: var(--sync-busy);
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .4
+      }
+    }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-size: .7rem;
+      color: var(--text-muted);
+      transition: .2s;
+    }
+
+    .toggle-track {
+      width: 28px;
+      height: 14px;
+      background: var(--surface3);
+      border-radius: 7px;
+      position: relative;
+    }
+
+    .toggle-thumb {
+      width: 10px;
+      height: 10px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: .2s;
+    }
+
+    body.white-mode .toggle-thumb {
+      left: 16px;
+      background: var(--accent);
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+      transition: .15s;
+    }
+
+    .icon-btn:hover {
+      background: var(--glass);
+    }
+
+    .admin-badge {
+      background: var(--accent);
+      color: #000;
+      font-size: .6rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 10px;
+      letter-spacing: .05em;
+    }
+
+    /* ===========================  MAIN LAYOUT  =========================== */
+    .main-content {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ===========================  CARD  =========================== */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* ===========================  BUTTONS  =========================== */
+    .btn-sm {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: .77rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: .2s;
+      white-space: nowrap;
+    }
+
+    .btn-sm:hover {
+      background: var(--surface3);
+    }
+
+    .btn-sm.accent {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .btn-sm.accent:hover {
+      opacity: .85;
+    }
+
+    .btn-sm.danger {
+      background: #d9534f;
+      color: #fff;
+      border-color: #d9534f;
+    }
+
+    .btn-sm.danger:hover {
+      background: #c9302c;
+    }
+
+    /* ===========================  FORM  =========================== */
+    .form-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: .82rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .form-input:focus {
+      border-color: rgba(240, 192, 74, .4);
+    }
+
+    .form-label {
+      font-size: .77rem;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .form-hint {
+      font-size: .72rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .form-row {
+      margin-bottom: 12px;
+    }
+
+    /* ===========================  NOTICE / ADMIN AREAS  =========================== */
+    .field-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .field-row input,
+    .field-row textarea {
+      flex: 1;
+    }
+
+    .msg-area {
+      font-size: .75rem;
+      text-align: center;
+      min-height: 18px;
+      padding: 2px 0;
+    }
+
+    .msg-area.ok {
+      color: #4ade80;
+    }
+
+    .msg-area.err {
+      color: #f87171;
+    }
+
+    .notice-item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 4px;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 700;
+    }
+
+    .notice-item-body {
+      display: none;
+      padding: 12px 14px;
+      font-size: .82rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      background: linear-gradient(135deg, rgba(232, 131, 74, .08), rgba(240, 192, 74, .05));
+      border: 1px solid rgba(232, 131, 74, .2);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .notice-meta {
+      font-size: .68rem;
+      color: var(--text-dim);
+      margin-top: 8px;
+      text-align: right;
+    }
+
+    .admin-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      font-size: .8rem;
+    }
+
+    /* ===========================  TOAST  =========================== */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 18px;
+      font-size: .8rem;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: var(--shadow);
+      z-index: 999;
+      transition: transform .3s;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast span:first-child {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    /* ===========================  SETTINGS MODAL  =========================== */
+    #settings-modal {
+      display: none;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
+      z-index: 200;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-wrap {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 201;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-head h2 {
+      font-size: .95rem;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 0 4px;
+    }
+
+    .modal-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-tab {
+      flex: 1;
+      padding: 10px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: .8rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: .2s;
+    }
+
+    .modal-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .modal-tab-content {
+      display: none;
+      padding: 16px 20px;
+    }
+
+    .modal-tab-content.active {
+      display: block;
+    }
+
+    .modal-msg {
+      font-size: .75rem;
+      min-height: 18px;
+      margin-top: 8px;
+    }
+
+    .modal-msg.ok {
+      color: #4ade80;
+    }
+
+    .modal-msg.err {
+      color: #f87171;
+    }
+
+    /* ===========================  FOOTER  =========================== */
+    .footer {
+      text-align: center;
+      padding: 20px 16px;
+      font-size: .68rem;
+      color: var(--text-dim);
+    }
+
+    /* ===========================  PWA BANNER  =========================== */
+    .pwa-banner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 300;
+    }
+
+    .pwa-banner-text {
+      font-size: .8rem;
+      color: var(--text);
+    }
+
+    .pwa-banner-text strong {
+      color: var(--accent);
+    }
+
+    .pwa-banner-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===================== SETUP WIZARD ===================== -->
+  <div id="setup-screen">
+    <div class="setup-card">
+      <div class="setup-logo">God's<br>Love</div>
+      <h2>처음 오셨군요! 👋</h2>
+      <p>Google Sheets와 연결하면 관리자 기능을 사용할 수 있습니다.</p>
+      <div class="setup-input-wrap">
+        <input type="url" id="script-url-input" placeholder="https://script.google.com/macros/s/…/exec" />
+      </div>
+      <div class="setup-actions">
+        <button class="setup-btn primary" id="setup-test-btn">🔗 연결 테스트</button>
+        <button class="setup-btn primary" id="setup-save-btn" style="display:none;">✓ 저장하고 시작</button>
+      </div>
+      <div class="setup-msg" id="setup-msg"></div>
+      <div class="setup-skip"><a id="setup-skip-btn">Google Sheets 없이 사용하기</a></div>
+    </div>
+  </div>
+
+  <!-- ===================== ADMIN APP ===================== -->
+  <div class="app-container" id="planner-app">
+
+    <div class="header">
+      <div class="header-brand">
+        <div class="brand-logo">God's<br>Love</div>
+        <div class="brand-title">
+          <h1>King's Planner <span class="admin-badge">ADMIN</span></h1>
+          <span>With King of kings</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="sync-badge no-sync" id="sync-badge">
+          <div class="sync-dot"></div>
+          <span id="sync-label">오프라인</span>
+        </div>
+        <button class="theme-toggle" id="theme-toggle">
+          <span id="theme-label">☀️ 화이트</span>
+          <div class="toggle-track">
+            <div class="toggle-thumb"></div>
+          </div>
+        </button>
+        <button class="icon-btn" id="settings-btn" title="설정">⚙️</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+
+      <!-- 새 공지 작성 -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📢 새 공지 작성</span>
+        </div>
+        <div style="padding:14px 16px; display:flex; flex-direction:column; gap:8px;">
+          <div class="field-row">
+            <input class="form-input" type="text" id="notice-title-input" placeholder="공지 제목 (옵션)" />
+          </div>
+          <textarea class="form-input" id="notice-input" rows="4" placeholder="공지 내용을 입력하세요..."
+            style="resize:vertical; min-height:80px; line-height:1.6;"></textarea>
+          <button class="btn-sm accent" id="notice-post-btn" style="align-self:stretch;">✉️ 공지 등록 및 이메일 발송</button>
+          <div class="msg-area" id="notice-post-msg"></div>
+        </div>
+      </div>
+
+      <!-- 공지 이력 관리 -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">📋 공지 이력 관리</span>
+          <button class="btn-sm" id="refresh-notice-btn">🔄 새로고침</button>
+        </div>
+        <div id="notice-history-container" style="padding:14px 16px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-size:.8rem; color:var(--text-muted);">불러오는 중...</div>
+        </div>
+      </div>
+
+      <!-- 관리자 권한 관리 -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">👑 관리자 권한 관리</span>
+        </div>
+        <div style="padding:14px 16px; display:flex; flex-direction:column; gap:10px;">
+          <div class="field-row">
+            <input class="form-input" type="email" id="new-admin-email"
+              placeholder="추가할 Gmail 주소 (예: admin@gmail.com)" />
+            <button class="btn-sm accent" id="add-admin-btn" style="flex-shrink:0;">추가</button>
+          </div>
+          <div id="admin-list-container" style="display:flex; flex-direction:column; gap:6px;">
+            <div style="font-size:.8rem; color:var(--text-muted);">불러오는 중...</div>
+          </div>
+          <div class="msg-area" id="admin-post-msg"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer">✦ King's Planner by GOD's LOVE &nbsp;·&nbsp; 관리자 전용</div>
+  </div>
+
+  <div class="toast" id="toast"><span>✓</span><span id="toast-msg">완료</span></div>
+
+  <!-- ===== SETTINGS MODAL ===== -->
+  <div id="settings-modal">
+    <div class="modal-overlay" id="settings-overlay"></div>
+    <div class="modal-wrap">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2>⚙️ 설정</h2>
+          <button class="modal-close" id="settings-modal-close">×</button>
+        </div>
+        <div class="modal-tabs">
+          <button class="modal-tab active" data-tab="conn">🔗 연결</button>
+          <button class="modal-tab" data-tab="acct">👤 내 계정</button>
+        </div>
+        <div class="modal-tab-content active" id="tab-conn">
+          <div class="form-row">
+            <label class="form-label">Apps Script 웹앱 URL</label>
+            <input class="form-input" id="cfg-url" type="url" placeholder="https://script.google.com/macros/s/…/exec" />
+            <div class="form-hint">변경 후 반드시 연결 테스트를 해주세요.</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-sm accent" id="cfg-test-btn">🔗 연결 테스트</button>
+            <button class="btn-sm" id="cfg-save-url-btn">저장</button>
+          </div>
+          <div class="modal-msg" id="cfg-url-msg"></div>
+        </div>
+        <div class="modal-tab-content" id="tab-acct">
+          <div class="form-row">
+            <label class="form-label">내 이름</label>
+            <input class="form-input" id="cfg-name" type="text" placeholder="홍길동" />
+          </div>
+          <div class="form-row">
+            <label class="form-label">내 Gmail 주소</label>
+            <input class="form-input" id="cfg-email" type="email" placeholder="me@gmail.com" />
+            <div class="form-hint">공지 알림 수신 및 관리자 권한 확인에 사용됩니다.</div>
+          </div>
+          <button class="btn-sm accent" id="cfg-acct-save-btn">💾 저장 및 등록</button>
+          <div class="modal-msg" id="cfg-acct-msg"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PWA 배너 ===== -->
+  <div class="pwa-banner" id="pwa-banner" style="display:none;">
+    <div class="pwa-banner-text">📱 <strong>King's Planner</strong> 앱으로 설치하면 더 편리합니다!</div>
+    <div class="pwa-banner-actions">
+      <button class="btn-sm accent" id="pwa-install-btn">설치</button>
+      <button class="btn-sm" id="pwa-dismiss-btn">닫기</button>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================
+       STATE
+    ============================================================ */
+    let scriptUrl = localStorage.getItem('planner_script_url') || '';
+
+    /* ============================================================
+       UTILS
+    ============================================================ */
+    function showToast(msg) {
+      document.getElementById('toast-msg').textContent = msg;
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      clearTimeout(window._tt);
+      window._tt = setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    function setSyncStatus(state, msg) {
+      const badge = document.getElementById('sync-badge');
+      const label = document.getElementById('sync-label');
+      badge.className = 'sync-badge ' + state;
+      label.textContent = msg;
+    }
+
+    /* ============================================================
+       THEME
+    ============================================================ */
+    function applyTheme(isWhite) {
+      document.body.classList.toggle('white-mode', isWhite);
+      document.getElementById('theme-label').textContent = isWhite ? '🌙 다크' : '☀️ 화이트';
+      localStorage.setItem('timebox_theme', isWhite ? 'white' : 'dark');
+    }
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      applyTheme(!document.body.classList.contains('white-mode'));
+    });
+
+    /* ============================================================
+       SETUP WIZARD
+    ============================================================ */
+    function openSetup() {
+      document.getElementById('planner-app').style.display = 'none';
+      document.getElementById('setup-screen').style.display = 'flex';
+      document.getElementById('script-url-input').value = scriptUrl || '';
+      document.getElementById('setup-msg').textContent = '';
+      document.getElementById('setup-save-btn').style.display = 'none';
+      document.getElementById('setup-test-btn').style.display = 'inline-block';
+    }
+    function closeSetup() {
+      document.getElementById('setup-screen').style.display = 'none';
+      document.getElementById('planner-app').style.display = 'block';
+    }
+    function setSetupMsg(msg, cls) {
+      const el = document.getElementById('setup-msg');
+      el.textContent = msg; el.className = 'setup-msg ' + (cls || '');
+    }
+
+    document.getElementById('setup-test-btn').addEventListener('click', async () => {
+      const url = document.getElementById('script-url-input').value.trim();
+      if (!url) { setSetupMsg('URL을 입력해 주세요.', 'err'); return; }
+      if (!url.startsWith('https://script.google.com')) { setSetupMsg('올바른 Apps Script URL이 아닙니다.', 'err'); return; }
+      setSetupMsg('연결 테스트 중…');
+      try {
+        const res = await fetch(`${url}?date=test&_=${Date.now()}`);
+        const json = await res.json();
+        if (json.error && !json.exists) throw new Error(json.error);
+        setSetupMsg('✅ 연결 성공! 저장하고 시작하세요.', 'ok');
+        document.getElementById('setup-save-btn').style.display = 'inline-block';
+        document.getElementById('setup-test-btn').style.display = 'none';
+        document.getElementById('setup-save-btn').dataset.url = url;
+      } catch (e) {
+        setSetupMsg('❌ 연결 실패. URL 또는 배포 설정을 확인하세요.', 'err');
+      }
+    });
+
+    document.getElementById('setup-save-btn').addEventListener('click', () => {
+      const url = document.getElementById('setup-save-btn').dataset.url;
+      scriptUrl = url;
+      localStorage.setItem('planner_script_url', url);
+      localStorage.setItem('planner_setup_done', '1');
+      setSyncStatus('ok', '✓ 연결됨');
+      document.getElementById('sync-badge').classList.remove('no-sync');
+      closeSetup();
+      showToast('Google Sheets 연결 완료!');
+      fetchNoticeHistory();
+      fetchAdmins();
+    });
+
+    document.getElementById('setup-skip-btn').addEventListener('click', () => {
+      scriptUrl = '';
+      localStorage.removeItem('planner_script_url');
+      setSyncStatus('off', '오프라인 모드');
+      document.getElementById('sync-badge').classList.add('no-sync');
+      closeSetup();
+    });
+
+    /* ============================================================
+       SETTINGS MODAL
+    ============================================================ */
+    function openSettingsModal() {
+      document.getElementById('settings-modal').style.display = 'block';
+      document.getElementById('cfg-url').value = scriptUrl || '';
+      document.getElementById('cfg-name').value = localStorage.getItem('planner_name') || '';
+      document.getElementById('cfg-email').value = localStorage.getItem('planner_email') || '';
+    }
+    function closeSettingsModal() {
+      document.getElementById('settings-modal').style.display = 'none';
+    }
+    document.getElementById('settings-btn').addEventListener('click', openSettingsModal);
+    document.getElementById('settings-modal-close').addEventListener('click', closeSettingsModal);
+    document.getElementById('settings-overlay').addEventListener('click', closeSettingsModal);
+
+    document.querySelectorAll('.modal-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.modal-tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    function setCfgMsg(id, msg, cls) {
+      const el = document.getElementById(id);
+      el.textContent = msg; el.className = 'modal-msg ' + (cls || '');
+    }
+
+    document.getElementById('cfg-test-btn').addEventListener('click', async () => {
+      const url = document.getElementById('cfg-url').value.trim();
+      if (!url) { setCfgMsg('cfg-url-msg', 'URL을 입력하세요.', 'err'); return; }
+      setCfgMsg('cfg-url-msg', '테스트 중…');
+      try {
+        const res = await fetch(`${url}?date=test&_=${Date.now()}`);
+        const json = await res.json();
+        if (json.error && !json.ok && !json.exists) throw new Error(json.error);
+        setCfgMsg('cfg-url-msg', '✅ 연결 성공!', 'ok');
+      } catch (e) { setCfgMsg('cfg-url-msg', '❌ 연결 실패.', 'err'); }
+    });
+
+    document.getElementById('cfg-save-url-btn').addEventListener('click', () => {
+      const url = document.getElementById('cfg-url').value.trim();
+      if (!url) return;
+      scriptUrl = url;
+      localStorage.setItem('planner_script_url', url);
+      document.getElementById('sync-badge').classList.remove('no-sync');
+      setSyncStatus('ok', '✓ 연결됨');
+      setCfgMsg('cfg-url-msg', '✅ URL이 저장되었습니다.', 'ok');
+    });
+
+    document.getElementById('cfg-acct-save-btn').addEventListener('click', async () => {
+      const name = document.getElementById('cfg-name').value.trim();
+      const email = document.getElementById('cfg-email').value.trim().toLowerCase();
+      if (!email || !email.includes('@')) { setCfgMsg('cfg-acct-msg', 'Gmail 주소를 입력하세요.', 'err'); return; }
+      localStorage.setItem('planner_name', name);
+      localStorage.setItem('planner_email', email);
+      if (scriptUrl) {
+        try {
+          const res = await fetch(scriptUrl, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'registerUser', email, name }),
+            headers: { 'Content-Type': 'text/plain' }
+          });
+          const json = await res.json();
+          const msg = json.already ? '✅ 저장됨 (이미 등록된 이메일)' : '✅ 저장 및 알림 등록 완료!';
+          setCfgMsg('cfg-acct-msg', msg, 'ok');
+        } catch (e) { setCfgMsg('cfg-acct-msg', '✅ 로컬 저장 완료', 'ok'); }
+      } else {
+        setCfgMsg('cfg-acct-msg', '✅ 저장되었습니다.', 'ok');
+      }
+    });
+
+    /* ============================================================
+       ADMIN HELPERS
+    ============================================================ */
+    function setNoticeMsg(msg, cls) {
+      const el = document.getElementById('notice-post-msg');
+      el.textContent = msg; el.className = 'msg-area ' + (cls || '');
+    }
+    function setAdminMsg(msg, cls) {
+      const el = document.getElementById('admin-post-msg');
+      el.textContent = msg; el.className = 'msg-area ' + (cls || '');
+    }
+    async function checkAccess() {
+      if (!scriptUrl) { showToast('⚙️ 설정에서 Apps Script URL을 연결하세요.'); return false; }
+      const email = localStorage.getItem('planner_email');
+      if (!email) { showToast('⚙️ 설정 > 내 계정에서 이메일을 등록하세요.'); return false; }
+      return { email, name: localStorage.getItem('planner_name') || email };
+    }
+
+    /* ============================================================
+       공지 작성
+    ============================================================ */
+    document.getElementById('notice-post-btn').addEventListener('click', async () => {
+      const access = await checkAccess(); if (!access) return;
+      const title = document.getElementById('notice-title-input').value.trim();
+      const content = document.getElementById('notice-input').value.trim();
+      if (!content) { setNoticeMsg('내용을 입력하세요.', 'err'); return; }
+      setNoticeMsg('등록 및 발송 중...');
+      try {
+        const res = await fetch(scriptUrl, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'saveNotice', title: title || '공지사항', content, author: access.name, authorEmail: access.email }),
+          headers: { 'Content-Type': 'text/plain' }
+        });
+        const json = await res.json();
+        if (json.error) throw new Error(json.error);
+        setNoticeMsg(`✅ 등록 완료! (${json.emailsSent}명에게 발송됨)`, 'ok');
+        document.getElementById('notice-input').value = '';
+        document.getElementById('notice-title-input').value = '';
+        fetchNoticeHistory();
+      } catch (e) { setNoticeMsg('❌ 오류: ' + e.message, 'err'); }
+    });
+
+    /* ============================================================
+       공지 이력
+    ============================================================ */
+    async function fetchNoticeHistory() {
+      if (!scriptUrl) {
+        document.getElementById('notice-history-container').innerHTML = '<div style="font-size:.8rem;color:var(--text-muted);">연결 필요</div>';
+        return;
+      }
+      document.getElementById('notice-history-container').innerHTML = '<div style="font-size:.8rem;color:var(--text-muted);">불러오는 중...</div>';
+      try {
+        const res = await fetch(`${scriptUrl}?action=getNotice&_=${Date.now()}`);
+        const json = await res.json();
+        const container = document.getElementById('notice-history-container');
+        if (json.notices && json.notices.length > 0) {
+          container.innerHTML = '';
+          json.notices.forEach(n => {
+            const wrap = document.createElement('div');
+            const head = document.createElement('div');
+            head.className = 'notice-item-head';
+            head.innerHTML = `<span>📢 ${n.title}</span>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <span style="font-size:.7rem;color:var(--text-muted);">${n.date}</span>
+                <button class="btn-sm danger" data-id="${n.id}" style="padding:3px 8px;font-size:.7rem;">삭제</button>
+              </div>`;
+            const body = document.createElement('div');
+            body.className = 'notice-item-body';
+            body.innerHTML = `${n.content}<div class="notice-meta">— ${n.author} (${n.updatedAt})</div>`;
+            head.addEventListener('click', e => {
+              if (e.target.closest('button')) return;
+              body.style.display = body.style.display === 'block' ? 'none' : 'block';
+            });
+            head.querySelector('button').addEventListener('click', async () => {
+              if (!confirm('이 공지를 삭제하시겠습니까?')) return;
+              await deleteNotice(n.id);
+            });
+            wrap.appendChild(head); wrap.appendChild(body);
+            container.appendChild(wrap);
+          });
+        } else {
+          container.innerHTML = '<div style="font-size:.8rem;color:var(--text-muted);padding:4px 0;">등록된 공지가 없습니다.</div>';
+        }
+      } catch (e) {
+        document.getElementById('notice-history-container').innerHTML = '<div style="font-size:.8rem;color:#f87171;">불러오기 실패</div>';
+      }
+    }
+    document.getElementById('refresh-notice-btn').addEventListener('click', fetchNoticeHistory);
+
+    async function deleteNotice(id) {
+      const access = await checkAccess(); if (!access) return;
+      try {
+        const res = await fetch(scriptUrl, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'deleteNotice', id, authorEmail: access.email }),
+          headers: { 'Content-Type': 'text/plain' }
+        });
+        const json = await res.json();
+        if (json.error) throw new Error(json.error);
+        showToast('공지가 삭제되었습니다.');
+        fetchNoticeHistory();
+      } catch (e) { alert('삭제 오류: ' + e.message); }
+    }
+
+    /* ============================================================
+       관리자 권한
+    ============================================================ */
+    async function fetchAdmins() {
+      if (!scriptUrl) {
+        document.getElementById('admin-list-container').innerHTML = '<div style="font-size:.8rem;color:var(--text-muted);">연결 필요</div>';
+        return;
+      }
+      try {
+        const res = await fetch(`${scriptUrl}?action=getAdmins&_=${Date.now()}`);
+        const json = await res.json();
+        const container = document.getElementById('admin-list-container');
+        // API returns admins as string array ["email1", "email2"]
+        const admins = (json.admins || []).filter(e => typeof e === 'string' && e.includes('@'));
+        if (admins.length > 0) {
+          container.innerHTML = '';
+          admins.forEach(email => {
+            const row = document.createElement('div');
+            row.className = 'admin-row';
+            row.innerHTML = `<span>${email}</span>
+              <button class="btn-sm" style="font-size:.7rem;padding:3px 8px;">해제</button>`;
+            row.querySelector('button').addEventListener('click', async () => {
+              if (!confirm(`${email} 관리자 권한을 해제하시겠습니까?`)) return;
+              const remaining = admins.filter(a => a !== email);
+              await updateAdmins(remaining);
+            });
+            container.appendChild(row);
+          });
+        } else {
+          container.innerHTML = '<div style="font-size:.8rem;color:var(--text-muted);">등록된 관리자가 없습니다.</div>';
+        }
+      } catch (e) { }
+    }
+
+    async function updateAdmins(emailsArr) {
+      const access = await checkAccess(); if (!access) return;
+      setAdminMsg('저장 중...');
+      try {
+        const res = await fetch(scriptUrl, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'setAdmins', emails: emailsArr, requesterEmail: access.email }),
+          headers: { 'Content-Type': 'text/plain' }
+        });
+        const json = await res.json();
+        if (json.error) throw new Error(json.error);
+        setAdminMsg('✅ 관리자 목록이 업데이트되었습니다.', 'ok');
+        document.getElementById('new-admin-email').value = '';
+        fetchAdmins();
+      } catch (e) { setAdminMsg('❌ 오류: ' + e.message, 'err'); }
+    }
+
+    document.getElementById('add-admin-btn').addEventListener('click', async () => {
+      if (!scriptUrl) { setAdminMsg('먼저 연결하세요.', 'err'); return; }
+      const newEmail = document.getElementById('new-admin-email').value.trim().toLowerCase();
+      if (!newEmail || !newEmail.includes('@')) { setAdminMsg('올바른 이메일을 입력하세요.', 'err'); return; }
+      setAdminMsg('확인 중...');
+      try {
+        const res = await fetch(`${scriptUrl}?action=getAdmins&_=${Date.now()}`);
+        const json = await res.json();
+        const cur = (json.admins || []).filter(e => typeof e === 'string').map(a => a.toLowerCase());
+        if (cur.includes(newEmail)) { setAdminMsg('이미 관리자로 등록되어 있습니다.', 'err'); return; }
+        cur.push(newEmail);
+        await updateAdmins(cur);
+      } catch (e) { setAdminMsg('오류: ' + e.message, 'err'); }
+    });
+
+    /* ============================================================
+       PWA
+    ============================================================ */
+    let deferredPwaPrompt = null;
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => { }));
+    }
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault(); deferredPwaPrompt = e;
+      if (!localStorage.getItem('pwa_dismissed')) document.getElementById('pwa-banner').style.display = 'flex';
+    });
+    window.addEventListener('DOMContentLoaded', () => {
+      const ib = document.getElementById('pwa-install-btn');
+      const db = document.getElementById('pwa-dismiss-btn');
+      if (ib) ib.addEventListener('click', () => { if (deferredPwaPrompt) { deferredPwaPrompt.prompt(); deferredPwaPrompt = null; } document.getElementById('pwa-banner').style.display = 'none'; });
+      if (db) db.addEventListener('click', () => { document.getElementById('pwa-banner').style.display = 'none'; localStorage.setItem('pwa_dismissed', '1'); });
+    });
+
+    /* ============================================================
+       INIT
+    ============================================================ */
+    if (localStorage.getItem('timebox_theme') === 'white') applyTheme(true);
+
+    if (!scriptUrl && !localStorage.getItem('planner_setup_done')) {
+      openSetup();
+    } else {
+      closeSetup();
+      if (scriptUrl) {
+        document.getElementById('sync-badge').classList.remove('no-sync');
+        setSyncStatus('ok', '✓ 연결됨');
+        setTimeout(() => { fetchNoticeHistory(); fetchAdmins(); }, 300);
+      }
+    }
+  </script>
+
+</body>
+
+</html>
