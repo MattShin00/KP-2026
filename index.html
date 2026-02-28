@@ -1632,7 +1632,7 @@
 
       <div class="header-actions">
         <!-- Sync badge -->
-        <div class="sync-badge no-sync" id="sync-badge">
+        <div class="sync-badge no-sync" id="sync-badge" title="클릭하면 지금 동기화" style="cursor:pointer;" id="sync-badge">
           <div class="sync-dot"></div>
           <span id="sync-label">오프라인</span>
         </div>
@@ -2123,6 +2123,24 @@
       applyData({}); updateStats(); updateProgress();
       showToast('초기화되었습니다');
     });
+
+    // 🔄 수동 동기화 — sync badge 클릭
+    document.getElementById('sync-badge').addEventListener('click', async () => {
+      if (!scriptUrl) { showToast('먼저 Google Sheets를 연결하세요 (⚙️)'); return; }
+      const data = collectData(); saveLocal(currentDate, data);
+      clearTimeout(pendingPush);
+      showToast('🔄 동기화 중...');
+      const remote = await pullFromSheets(currentDate);
+      if (remote) { saveLocal(currentDate, remote); applyData(remote); updateStats(); updateProgress(); showToast('✓ 동기화 완료!'); }
+      else { showToast('✓ 최신 상태입니다'); }
+    });
+
+    // ⏱️ 3분마다 자동 동기화
+    setInterval(async () => {
+      if (!scriptUrl || isSyncing) return;
+      const remote = await pullFromSheets(currentDate);
+      if (remote) { saveLocal(currentDate, remote); applyData(remote); updateStats(); updateProgress(); }
+    }, 3 * 60 * 1000);
 
     /* Settings btn → handled by openSettingsModal() below */
 
