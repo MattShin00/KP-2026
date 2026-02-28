@@ -2602,7 +2602,9 @@
     } else {
       localStorage.setItem('planner_setup_done', '1');
       closeSetup();
-      setDate(todayStr());
+      document.getElementById('date-input').value = currentDate;
+      document.getElementById('date-weekday').textContent = getWeekday(currentDate);
+      loadPage(currentDate);
       fetchNotice(); // 공지 로드
     }
   </script>
