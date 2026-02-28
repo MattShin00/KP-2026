@@ -2184,6 +2184,32 @@
       }
     }, 30 * 1000); // 30초마다 체크 (실제 pull 빈도는 활성/휴식 상태에 따라 결정)
 
+    // 📲 모바일에서 앱으로 돌아올 때 자동 동기화
+    // (브라우저가 페이지를 메모리에서 복원할 때 loadPage가 재실행되지 않는 문제를 해결)
+    async function syncOnFocus() {
+      if (!scriptUrl) return;
+      lastAutoPull = 0; // 강제로 즉시 pull 허용
+      const local = loadLocal(currentDate);
+      const remote = await pullFromSheets(currentDate, true);
+      if (remote) {
+        const remoteTime = remote.lastModified
+          ? new Date(remote.lastModified.replace(' ', 'T') + '+09:00') : new Date(0);
+        const localTime = local._localModified ? new Date(local._localModified) : new Date(0);
+        if (remoteTime > localTime) {
+          saveLocal(currentDate, remote);
+          applyData(remote); updateStats(); updateProgress();
+          setSyncStatus('ok', '✓ 동기화됨');
+        }
+      }
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') syncOnFocus();
+    });
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) syncOnFocus(); // 뒤로가기/앱 전환 복귀 시
+    });
+    window.addEventListener('focus', () => syncOnFocus()); // 탭 포커스 복귀 시
+
     /* Settings btn → handled by openSettingsModal() below */
 
     /* ============================================================
