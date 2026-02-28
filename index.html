@@ -1897,14 +1897,20 @@
         const url = `${scriptUrl}?date=${date}&_=${Date.now()}`;
         const res = await fetch(url, { method: 'GET' });
         const json = await res.json();
-        if (json.error) throw new Error(json.error);
+        if (json.error) {
+          showToast('❌ API 오류: ' + json.error);
+          setSyncStatus('off', '⚡ 오프라인');
+          return null;
+        }
         if (!json.exists) {
+          showToast(`📋 날짜 ${date} 데이터 없음 (Sheets에 미존재)`);
           setSyncStatus('ok', '✓ 동기화됨');
           return null;
         }
         setSyncStatus('ok', '✓ 동기화됨');
         return json;
       } catch (e) {
+        showToast('❌ 연결 오류: ' + e.message);
         setSyncStatus('off', '⚡ 오프라인');
         return null;
       }
