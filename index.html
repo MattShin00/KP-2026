@@ -742,7 +742,7 @@
     }
 
     .priority-check.checked::after {
-      content: '✓';
+      content: '??;
       position: absolute;
       inset: 0;
       display: flex;
@@ -1581,31 +1581,31 @@
   <div id="setup-screen" style="display:none;">
     <div class="setup-card">
       <div class="setup-logo">God's<br>Love</div>
-      <h2>처음 오셨군요! 👋</h2>
-      <p>Google Sheets와 연결하면 PC·핸드폰 어디서든 같은 데이터를 사용할 수 있습니다.<br>
-        아래 3단계를 따라 설정하세요. (약 5분 소요)</p>
+      <h2>처음 ?�셨군요! ?��</h2>
+      <p>Google Sheets?� ?�결?�면 PC·?�드???�디?�든 같�? ?�이?��? ?�용?????�습?�다.<br>
+        ?�래 3?�계�??�라 ?�정?�세?? (??5�??�요)</p>
       <ol class="setup-steps">
         <li><span class="step-num">1</span>
-          <span><strong>script.google.com</strong> → 새 프로젝트 → 기존 코드 전체 삭제<br>
-            → <code>PlannerAPI.gs</code> 파일 내용 붙여넣기 → 저장</span>
+          <span><strong>script.google.com</strong> ?????�로?�트 ??기존 코드 ?�체 ??��<br>
+            ??<code>PlannerAPI.gs</code> ?�일 ?�용 붙여?�기 ???�??/span>
         </li>
         <li><span class="step-num">2</span>
-          <span><strong>배포 → 새 배포</strong> → 유형: 웹앱 → 액세스: <strong>모든 사용자</strong> → 배포 → URL 복사</span>
+          <span><strong>배포 ????배포</strong> ???�형: ?�앱 ???�세?? <strong>모든 ?�용??/strong> ??배포 ??URL 복사</span>
         </li>
         <li><span class="step-num">3</span>
-          <span>아래에 복사한 <strong>웹 앱 URL</strong> 붙여넣기 → 연결 테스트 → 시작!</span>
+          <span>?�래??복사??<strong>????URL</strong> 붙여?�기 ???�결 ?�스?????�작!</span>
         </li>
       </ol>
       <div class="setup-input-wrap">
-        <input type="url" id="script-url-input" placeholder="https://script.google.com/macros/s/…/exec" />
+        <input type="url" id="script-url-input" placeholder="https://script.google.com/macros/s/??exec" />
       </div>
       <div class="setup-actions">
-        <button class="setup-btn primary" id="setup-test-btn">🔗 연결 테스트</button>
-        <button class="setup-btn primary" id="setup-save-btn" style="display:none;">✓ 저장하고 시작</button>
+        <button class="setup-btn primary" id="setup-test-btn">?�� ?�결 ?�스??/button>
+        <button class="setup-btn primary" id="setup-save-btn" style="display:none;">???�?�하�??�작</button>
       </div>
       <div class="setup-msg" id="setup-msg"></div>
       <div class="setup-skip">
-        <a id="setup-skip-btn">Google Sheets 없이 사용하기 (이 기기만 저장됨)</a>
+        <a id="setup-skip-btn">Google Sheets ?�이 ?�용?�기 (??기기�??�?�됨)</a>
       </div>
     </div>
   </div>
@@ -1623,32 +1623,32 @@
       </div>
 
       <div class="date-nav">
-        <button class="date-btn" id="prev-day">‹</button>
+        <button class="date-btn" id="prev-day">??/button>
         <div class="date-display">
           <input type="date" id="date-input" />
           <div id="date-weekday"></div>
         </div>
-        <button class="date-btn" id="next-day">›</button>
-        <button class="today-btn" id="today-btn">오늘</button>
+        <button class="date-btn" id="next-day">??/button>
+        <button class="today-btn" id="today-btn">?�늘</button>
       </div>
 
       <div class="header-actions">
         <!-- Sync badge -->
-        <div class="sync-badge no-sync" id="sync-badge" title="클릭하면 지금 동기화" style="cursor:pointer;" id="sync-badge">
+        <div class="sync-badge no-sync" id="sync-badge" title="?�릭?�면 지�??�기?? style="cursor:pointer;" id="sync-badge">
           <div class="sync-dot"></div>
-          <span id="sync-label">오프라인</span>
+          <span id="sync-label">?�프?�인</span>
         </div>
         <!-- Theme toggle -->
         <button class="theme-toggle" id="theme-toggle">
-          <span id="theme-label">☀️ 화이트</span>
+          <span id="theme-label">?��??�이??/span>
           <div class="toggle-track">
             <div class="toggle-thumb"></div>
           </div>
         </button>
-        <button class="action-btn" id="share-btn">📤 공유</button>
-        <button class="action-btn primary" id="print-btn">🖨️ 인쇄</button>
-        <button class="action-btn" id="clear-btn">🗑️ 초기화</button>
-        <button class="icon-btn" id="settings-btn" title="설정">⚙️</button>
+        <button class="action-btn" id="share-btn">?�� 공유</button>
+        <button class="action-btn primary" id="print-btn">?���??�쇄</button>
+        <button class="action-btn" id="clear-btn">?���?초기??/button>
+        <button class="icon-btn" id="settings-btn" title="?�정">?�️</button>
       </div>
     </div>
 
@@ -1662,7 +1662,7 @@
           <div class="priorities-list" id="priorities-list"></div>
           <div class="progress-bar-wrap">
             <div class="progress-label">
-              <span>오늘의 진행률</span>
+              <span>?�늘??진행�?/span>
               <span id="progress-pct">0%</span>
             </div>
             <div class="progress-bar">
@@ -1674,22 +1674,22 @@
         <div class="card">
           <div class="card-header">
             <span class="card-title">Brain Dump</span>
-            <span style="font-size:.68rem;color:var(--text-muted)">자유롭게 쏟아내기</span>
+            <span style="font-size:.68rem;color:var(--text-muted)">?�유�?�� ?�아?�기</span>
           </div>
           <div class="brain-dump-body">
-            <textarea id="brain-dump" placeholder="머릿속에 있는 것들을 전부 적어보세요.&#10;아이디어, 걱정, 할 일, 떠오르는 생각..."></textarea>
+            <textarea id="brain-dump" placeholder="머릿?�에 ?�는 것들???��? ?�어보세??&#10;?�이?�어, 걱정, ???? ?�오르는 ?�각..."></textarea>
           </div>
         </div>
 
         <div class="card">
-          <div class="card-header"><span class="card-title">오늘의 현황</span></div>
+          <div class="card-header"><span class="card-title">?�늘???�황</span></div>
           <div class="stats-grid">
             <div class="stat-item">
-              <div class="stat-label">채워진 시간</div>
+              <div class="stat-label">채워�??�간</div>
               <div class="stat-value accent" id="stat-filled">0</div>
             </div>
             <div class="stat-item">
-              <div class="stat-label">빈 슬롯</div>
+              <div class="stat-label">�??�롯</div>
               <div class="stat-value" id="stat-empty">38</div>
             </div>
             <div class="stat-item">
@@ -1703,26 +1703,26 @@
           </div>
         </div>
 
-        <!-- 오늘의 공지 카드 -->
+        <!-- ?�늘??공�? 카드 -->
         <div class="card notice-card" id="notice-card">
           <div class="card-header">
             <span class="card-title" style="display:flex;align-items:center;gap:7px;">
               <span class="notice-dot" id="notice-dot" style="display:none;"></span>
-              오늘의 공지
+              ?�늘??공�?
             </span>
           </div>
 
           <div class="notice-list-container" id="notice-list-container"
             style="padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
-            <div class="notice-text">공지사항이 없습니다.</div>
+            <div class="notice-text">공�??�항???�습?�다.</div>
           </div>
 
-          <!-- 이메일 알림 등록 -->
+          <!-- ?�메???�림 ?�록 -->
           <div class="email-register" id="email-register-panel">
-            <div class="email-register-title">📧 공지 이메일 알림 받기 (Gmail)</div>
+            <div class="email-register-title">?�� 공�? ?�메???�림 받기 (Gmail)</div>
             <div class="email-register-row">
-              <input type="email" id="user-email-input" placeholder="내 Gmail 주소" />
-              <button class="btn-sm accent" id="email-register-btn">등록</button>
+              <input type="email" id="user-email-input" placeholder="??Gmail 주소" />
+              <button class="btn-sm accent" id="email-register-btn">?�록</button>
             </div>
             <div class="notice-msg" id="email-register-msg"></div>
           </div>
@@ -1733,7 +1733,7 @@
       <div class="right-panel">
         <div class="card">
           <div class="timebox-header">
-            <span class="card-title" style="font-size:.85rem;">시간</span>
+            <span class="card-title" style="font-size:.85rem;">?�간</span>
             <span class="time-col-label">: 00</span>
             <span class="time-col-label">: 30</span>
           </div>
@@ -1742,10 +1742,10 @@
       </div>
     </div>
 
-    <div class="footer">✦ 모든 데이터는 자동 저장됩니다 &nbsp;·&nbsp; King's Planner by GOD's LOVE</div>
+    <div class="footer">??모든 ?�이?�는 ?�동 ?�?�됩?�다 &nbsp;·&nbsp; King's Planner by GOD's LOVE</div>
   </div>
 
-  <div class="toast" id="toast"><span>✓</span><span id="toast-msg">저장되었습니다</span></div>
+  <div class="toast" id="toast"><span>??/span><span id="toast-msg">?�?�되?�습?�다</span></div>
 
   <!-- ===== SETTINGS MODAL ===== -->
   <div id="settings-modal" style="display:none;">
@@ -1753,38 +1753,38 @@
     <div class="modal-wrap">
       <div class="modal-card">
         <div class="modal-head">
-          <h2>⚙️ 설정</h2>
+          <h2>?�️ ?�정</h2>
           <button class="modal-close" id="settings-modal-close">×</button>
         </div>
         <div class="modal-tabs">
-          <button class="modal-tab active" data-tab="conn">🔗 연결</button>
-          <button class="modal-tab" data-tab="acct">👤 내 계정</button>
+          <button class="modal-tab active" data-tab="conn">?�� ?�결</button>
+          <button class="modal-tab" data-tab="acct">?�� ??계정</button>
         </div>
-        <!-- 연결 탭 -->
+        <!-- ?�결 ??-->
         <div class="modal-tab-content active" id="tab-conn">
           <div class="form-row">
-            <label class="form-label">Apps Script 웹앱 URL</label>
-            <input class="form-input" id="cfg-url" type="url" placeholder="https://script.google.com/macros/s/…/exec" />
-            <div class="form-hint">변경 후 반드시 연결 테스트를 해주세요.</div>
+            <label class="form-label">Apps Script ?�앱 URL</label>
+            <input class="form-input" id="cfg-url" type="url" placeholder="https://script.google.com/macros/s/??exec" />
+            <div class="form-hint">변�???반드???�결 ?�스?��? ?�주?�요.</div>
           </div>
           <div style="display:flex;gap:8px;">
-            <button class="btn-sm accent" id="cfg-test-btn">🔗 연결 테스트</button>
-            <button class="btn-sm orange" id="cfg-save-url-btn">저장</button>
+            <button class="btn-sm accent" id="cfg-test-btn">?�� ?�결 ?�스??/button>
+            <button class="btn-sm orange" id="cfg-save-url-btn">?�??/button>
           </div>
           <div class="modal-msg" id="cfg-url-msg"></div>
         </div>
-        <!-- 계정 탭 -->
+        <!-- 계정 ??-->
         <div class="modal-tab-content" id="tab-acct">
           <div class="form-row">
-            <label class="form-label">내 이름</label>
-            <input class="form-input" id="cfg-name" type="text" placeholder="홍길동" />
+            <label class="form-label">???�름</label>
+            <input class="form-input" id="cfg-name" type="text" placeholder="?�길?? />
           </div>
           <div class="form-row">
-            <label class="form-label">내 Gmail 주소</label>
+            <label class="form-label">??Gmail 주소</label>
             <input class="form-input" id="cfg-email" type="email" placeholder="me@gmail.com" />
-            <div class="form-hint">공지 알림 수신 및 관리자 권한 확인에 사용됩니다.</div>
+            <div class="form-hint">공�? ?�림 ?�신 �?관리자 권한 ?�인???�용?�니??</div>
           </div>
-          <button class="btn-sm accent" id="cfg-acct-save-btn">💾 저장 및 등록</button>
+          <button class="btn-sm accent" id="cfg-acct-save-btn">?�� ?�??�??�록</button>
           <div class="modal-msg" id="cfg-acct-msg"></div>
         </div>
       </div>
@@ -1797,32 +1797,32 @@
     <div class="modal-wrap">
       <div class="modal-card">
         <div class="modal-head">
-          <h2>📤 내 일정 공유하기</h2>
+          <h2>?�� ???�정 공유?�기</h2>
           <button class="modal-close" id="share-modal-close">×</button>
         </div>
         <div class="modal-body">
-          <div class="share-date-pill">📅 <span id="share-date-label"></span></div>
-          <label class="form-label">받는 사람 (Gmail 주소, Enter로 추가)</label>
+          <div class="share-date-pill">?�� <span id="share-date-label"></span></div>
+          <label class="form-label">받는 ?�람 (Gmail 주소, Enter�?추�?)</label>
           <div class="tag-input-wrap" id="share-tag-wrap">
-            <input class="tag-bare-input" id="share-tag-input" type="email" placeholder="email@gmail.com 입력 후 Enter" />
+            <input class="tag-bare-input" id="share-tag-input" type="email" placeholder="email@gmail.com ?�력 ??Enter" />
           </div>
-          <p class="share-info">공유 내용: 우선순위 · 시간 블록 <br>※ Brain Dump 및 공지사항은 공유에서 제외됩니다.</p>
+          <p class="share-info">공유 ?�용: ?�선?�위 · ?�간 블록 <br>??Brain Dump �?공�??�항?� 공유?�서 ?�외?�니??</p>
           <div class="modal-msg" id="share-msg"></div>
         </div>
         <div class="modal-actions">
-          <button class="btn-sm orange" id="share-send-btn" style="flex:1;padding:10px;">📤 공유하기</button>
+          <button class="btn-sm orange" id="share-send-btn" style="flex:1;padding:10px;">?�� 공유?�기</button>
           <button class="btn-sm" id="share-cancel-btn" style="flex:1;padding:10px;">취소</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== PWA 설치 배너 ===== -->
+  <!-- ===== PWA ?�치 배너 ===== -->
   <div class="pwa-banner" id="pwa-banner" style="display:none;">
-    <div class="pwa-banner-text">📱 <strong>King's Planner</strong> 앱으로 설치하면 더 편리합니다!</div>
+    <div class="pwa-banner-text">?�� <strong>King's Planner</strong> ?�으�??�치?�면 ???�리?�니??</div>
     <div class="pwa-banner-actions">
-      <button class="btn-sm accent" id="pwa-install-btn">설치</button>
-      <button class="btn-sm" id="pwa-dismiss-btn">닫기</button>
+      <button class="btn-sm accent" id="pwa-install-btn">?�치</button>
+      <button class="btn-sm" id="pwa-dismiss-btn">?�기</button>
     </div>
   </div>
 
@@ -1830,7 +1830,7 @@
     /* ============================================================
        CONSTANTS
     ============================================================ */
-    const WEEKDAYS = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+    const WEEKDAYS = ['?�요??, '?�요??, '?�요??, '?�요??, '목요??, '금요??, '?�요??];
     const HOURS = [];
     for (let h = 5; h <= 23; h++) HOURS.push(h);
     const TIME_KEYS = [];
@@ -1895,15 +1895,15 @@
     async function pullFromSheets(date, quiet) {
       if (!scriptUrl) return null;
       try {
-        if (!quiet) setSyncStatus('busy', '동기화 중…');
+        if (!quiet) setSyncStatus('busy', '?�기??중�?);
         const url = `${scriptUrl}?date=${date}&_=${Date.now()}`;
         const res = await fetch(url, { method: 'GET' });
         const json = await res.json();
-        if (json.error || !json.exists) { setSyncStatus('ok', '✓ 연결됨'); return null; }
-        setSyncStatus('ok', '✓ 연결됨');
+        if (json.error || !json.exists) { setSyncStatus('ok', '???�결??); return null; }
+        setSyncStatus('ok', '???�결??);
         return json;
       } catch (e) {
-        setSyncStatus('off', '⚡ 오프라인');
+        setSyncStatus('off', '???�프?�인');
         return null;
       }
     }
@@ -1911,7 +1911,7 @@
     async function pushToSheets(date, data) {
       if (!scriptUrl) return;
       isSyncing = true;
-      setSyncStatus('busy', '저장 중…');
+      setSyncStatus('busy', '?�??중�?);
       try {
         const payload = { action: 'savePlanner', date, ...data };
         await fetch(scriptUrl, {
@@ -1919,9 +1919,9 @@
           body: JSON.stringify(payload),
           headers: { 'Content-Type': 'text/plain' }
         });
-        setSyncStatus('ok', '✓ 동기화됨');
+        setSyncStatus('ok', '???�기?�됨');
       } catch (e) {
-        setSyncStatus('off', '⚡ 오프라인');
+        setSyncStatus('off', '???�프?�인');
       }
       isSyncing = false;
     }
@@ -1937,7 +1937,7 @@
         item.className = 'priority-item'; item.dataset.idx = i;
         item.innerHTML = `
       <div class="priority-num">${i + 1}</div>
-      <textarea class="priority-input" id="priority-${i}" rows="2" placeholder="오늘의 최우선 과제 ${i + 1}..."></textarea>
+      <textarea class="priority-input" id="priority-${i}" rows="2" placeholder="?�늘??최우??과제 ${i + 1}..."></textarea>
       <div class="priority-check" id="priority-check-${i}" data-idx="${i}"></div>`;
         c.appendChild(item);
         item.querySelector('.priority-input').addEventListener('input', onInput);
@@ -2001,7 +2001,7 @@
       updateStats(); updateProgress();
     }
 
-    // ★ 데이터가 완전히 비어있는지 확인하는 함수
+    // ???�이?��? ?�전??비어?�는지 ?�인?�는 ?�수
     function isDataEmpty(d) {
       if (!d) return true;
       if (d.brainDump && d.brainDump.trim()) return false;
@@ -2015,21 +2015,21 @@
       return true;
     }
 
-    // ★ Sheets 데이터 사용 여부 판정 (타임스탬프 기반)
+    // ??Sheets ?�이???�용 ?��? ?�정 (?�?�스?�프 기반)
     function shouldUseRemote(remote, local) {
       if (!remote) return false;
       const remoteEmpty = isDataEmpty(remote);
       const localEmpty = isDataEmpty(local);
 
-      // 1. 만약 로컬은 텅 비었고 Sheets에는 내용이 있다면 → 무조건 Sheets 보존
+      // 1. 만약 로컬?� ??비었�?Sheets?�는 ?�용???�다�???무조�?Sheets 보존
       if (localEmpty && !remoteEmpty) return true;
 
       const hasR = !!remote.lastModified;
       const hasL = !!local._localModified;
-      if (!hasR && !hasL) return true;   // 둘 다 타임스탬프 없음 → Sheets 신뢰 (초기 로드)
-      if (hasR && !hasL) return true;   // Sheets만 타임스탬프 있음 → Sheets 신뢰
-      if (!hasR && hasL) return false;  // 로컬만 타임스탬프 있음 → 로컬 신뢰 (★ 핵심 수정)
-      // 둘 다 타임스탬프 있음 → 최신 비교
+      if (!hasR && !hasL) return true;   // ?????�?�스?�프 ?�음 ??Sheets ?�뢰 (초기 로드)
+      if (hasR && !hasL) return true;   // Sheets�??�?�스?�프 ?�음 ??Sheets ?�뢰
+      if (!hasR && hasL) return false;  // 로컬�??�?�스?�프 ?�음 ??로컬 ?�뢰 (???�심 ?�정)
+      // ?????�?�스?�프 ?�음 ??최신 비교
       const rt = new Date(remote.lastModified.replace(' ', 'T') + '+09:00');
       const lt = new Date(local._localModified);
       return rt >= lt;
@@ -2043,7 +2043,7 @@
         saveLocal(date, remote);
         applyData(remote);
       } else if (remote && !isDataEmpty(local)) {
-        // 로컬이 더 최신이고 텅 비어있지 않은 경우에만 로컬을 Sheets에 push
+        // 로컬????최신?�고 ??비어?��? ?��? 경우?�만 로컬??Sheets??push
         clearTimeout(pendingPush);
         pushToSheets(date, local);
       }
@@ -2065,7 +2065,7 @@
       return d;
     }
 
-    let lastLocalActivity = 0; // 마지막 입력 시각 (적응형 폴링 사용)
+    let lastLocalActivity = 0; // 마�?�??�력 ?�각 (?�응???�링 ?�용)
 
     function scheduleSave() {
       const date = currentDate;
@@ -2074,7 +2074,7 @@
       lastLocalActivity = Date.now();
       saveLocal(date, data);
       clearTimeout(pendingPush);
-      pendingPush = setTimeout(() => pushToSheets(date, data), 1000); // 1초 디바운스 (즐시 push)
+      pendingPush = setTimeout(() => pushToSheets(date, data), 1000); // 1�??�바?�스 (즐시 push)
     }
 
     /* ============================================================
@@ -2121,7 +2121,7 @@
     brainDumpEl.addEventListener('input', scheduleSave);
     brainDumpEl.addEventListener('focus', function () {
       if (this.value === '') {
-        this.value = '• ';
+        this.value = '??';
       }
     });
     brainDumpEl.addEventListener('keydown', function (e) {
@@ -2130,7 +2130,7 @@
         const start = this.selectionStart;
         const end = this.selectionEnd;
         const text = this.value;
-        this.value = text.substring(0, start) + '\n• ' + text.substring(end);
+        this.value = text.substring(0, start) + '\n??' + text.substring(end);
         this.selectionStart = this.selectionEnd = start + 3;
         scheduleSave();
       }
@@ -2153,33 +2153,33 @@
     document.getElementById('today-btn').addEventListener('click', () => setDate(todayStr()));
     document.getElementById('print-btn').addEventListener('click', () => { const d = collectData(); saveLocal(currentDate, d); window.print(); });
     document.getElementById('clear-btn').addEventListener('click', () => {
-      if (!confirm('오늘 하루의 모든 내용을 초기화할까요?')) return;
+      if (!confirm('?�늘 ?�루??모든 ?�용??초기?�할까요?')) return;
       localStorage.removeItem(localKey(currentDate));
       applyData({}); updateStats(); updateProgress();
-      showToast('초기화되었습니다');
+      showToast('초기?�되?�습?�다');
     });
 
-    // 🔄 수동 동기화 — sync badge 클릭
+    // ?�� ?�동 ?�기????sync badge ?�릭
     document.getElementById('sync-badge').addEventListener('click', async () => {
-      if (!scriptUrl) { showToast('먼저 Google Sheets를 연결하세요 (⚙️)'); return; }
-      showToast('🔄 동기화 중...');
+      if (!scriptUrl) { showToast('먼�? Google Sheets�??�결?�세??(?�️)'); return; }
+      showToast('?�� ?�기??�?..');
       const local = loadLocal(currentDate);
       const remote = await pullFromSheets(currentDate);
       if (shouldUseRemote(remote, local)) {
         saveLocal(currentDate, remote); applyData(remote); updateStats(); updateProgress();
-        showToast('✓ Sheets 최신 데이터로 동기화됨');
+        showToast('??Sheets 최신 ?�이?�로 ?�기?�됨');
       } else if (remote && !isDataEmpty(local)) {
         const data = collectData();
         data._localModified = local._localModified;
         clearTimeout(pendingPush);
         pushToSheets(currentDate, data);
-        showToast('📤 로컬 최신 데이터를 Sheets에 업로드');
+        showToast('?�� 로컬 최신 ?�이?��? Sheets???�로??);
       } else {
-        showToast('✓ 이 날짜 Sheets 데이터 없음 (로컬 유지)');
+        showToast('?????�짜 Sheets ?�이???�음 (로컬 ?��?)');
       }
     });
 
-    // ⏱️ 적응형 자동 동기화 (활성: 30초 / 휴식: 5분)
+    // ?�️ ?�응???�동 ?�기??(?�성: 30�?/ ?�식: 5�?
     let lastAutoPull = 0;
     setInterval(async () => {
       if (!scriptUrl || isSyncing) return;
@@ -2193,7 +2193,7 @@
       if (shouldUseRemote(remote, local)) {
         saveLocal(currentDate, remote);
         applyData(remote); updateStats(); updateProgress();
-        setSyncStatus('ok', '✓ 동기화됨');
+        setSyncStatus('ok', '???�기?�됨');
       } else if (remote && !isDataEmpty(local)) {
         const data = collectData();
         data._localModified = local._localModified;
@@ -2201,7 +2201,7 @@
       }
     }, 30 * 1000);
 
-    // 📲 모바일에서 앱으로 돌아올 때 자동 동기화
+    // ?�� 모바?�에???�으�??�아?????�동 ?�기??
     async function syncOnFocus() {
       if (!scriptUrl) return;
       lastAutoPull = 0;
@@ -2210,7 +2210,7 @@
       if (shouldUseRemote(remote, local)) {
         saveLocal(currentDate, remote);
         applyData(remote); updateStats(); updateProgress();
-        setSyncStatus('ok', '✓ 동기화됨');
+        setSyncStatus('ok', '???�기?�됨');
       } else if (remote && !isDataEmpty(local)) {
         const data = collectData();
         data._localModified = local._localModified;
@@ -2225,14 +2225,14 @@
     });
     window.addEventListener('focus', () => syncOnFocus());
 
-    /* Settings btn → handled by openSettingsModal() below */
+    /* Settings btn ??handled by openSettingsModal() below */
 
     /* ============================================================
        THEME
     ============================================================ */
     function applyTheme(isWhite) {
       document.body.classList.toggle('white-mode', isWhite);
-      document.getElementById('theme-label').textContent = isWhite ? '🌙 다크' : '☀️ 화이트';
+      document.getElementById('theme-label').textContent = isWhite ? '?�� ?�크' : '?��??�이??;
       localStorage.setItem('timebox_theme', isWhite ? 'white' : 'dark');
     }
     document.getElementById('theme-toggle').addEventListener('click', () => {
@@ -2258,34 +2258,34 @@
 
     document.getElementById('setup-test-btn').addEventListener('click', async () => {
       const url = document.getElementById('script-url-input').value.trim();
-      if (!url) { setSetupMsg('URL을 입력해 주세요.', 'err'); return; }
-      if (!url.startsWith('https://script.google.com')) { setSetupMsg('올바른 Apps Script URL이 아닙니다.', 'err'); return; }
-      setSetupMsg('연결 테스트 중…', '');
+      if (!url) { setSetupMsg('URL???�력??주세??', 'err'); return; }
+      if (!url.startsWith('https://script.google.com')) { setSetupMsg('?�바�?Apps Script URL???�닙?�다.', 'err'); return; }
+      setSetupMsg('?�결 ?�스??중�?, '');
       try {
         const res = await fetch(`${url}?date=test&_=${Date.now()}`);
         const json = await res.json();
         if (json.error && !json.exists && json.error !== undefined) throw new Error(json.error);
-        setSetupMsg('✅ 연결 성공! 저장하고 시작하세요.', 'ok');
+        setSetupMsg('???�결 ?�공! ?�?�하�??�작?�세??', 'ok');
         document.getElementById('setup-save-btn').style.display = 'inline-block';
         document.getElementById('setup-test-btn').style.display = 'none';
         document.getElementById('setup-save-btn').dataset.url = url;
       } catch (e) {
-        setSetupMsg('❌ 연결 실패. URL을 확인하거나 배포 설정을 다시 확인하세요.', 'err');
+        setSetupMsg('???�결 ?�패. URL???�인?�거??배포 ?�정???�시 ?�인?�세??', 'err');
       }
     });
 
     document.getElementById('setup-save-btn').addEventListener('click', () => {
       const url = document.getElementById('setup-save-btn').dataset.url;
       scriptUrl = url; localStorage.setItem('planner_script_url', url);
-      setSyncStatus('ok', '✓ 동기화됨');
+      setSyncStatus('ok', '???�기?�됨');
       document.getElementById('sync-badge').classList.remove('no-sync');
       closeSetup(); loadPage(currentDate);
-      showToast('Google Sheets 연결 완료!');
+      showToast('Google Sheets ?�결 ?�료!');
     });
 
     document.getElementById('setup-skip-btn').addEventListener('click', () => {
       scriptUrl = ''; localStorage.removeItem('planner_script_url');
-      setSyncStatus('off', '오프라인 모드');
+      setSyncStatus('off', '?�프?�인 모드');
       document.getElementById('sync-badge').classList.add('no-sync');
       closeSetup();
     });
@@ -2296,7 +2296,7 @@
     }
 
     /* ============================================================
-       PWA — Service Worker 등록
+       PWA ??Service Worker ?�록
     ============================================================ */
     let deferredPwaPrompt = null;
     if ('serviceWorker' in navigator) {
@@ -2310,7 +2310,7 @@
         document.getElementById('pwa-banner').style.display = 'flex';
       }
     });
-    // PWA 버튼 리스너 — DOMContentLoaded 후 모달 HTML이 파싱된 다음 실행
+    // PWA 버튼 리스????DOMContentLoaded ??모달 HTML???�싱???�음 ?�행
     window.addEventListener('DOMContentLoaded', () => {
       const installBtn = document.getElementById('pwa-install-btn');
       const dismissBtn = document.getElementById('pwa-dismiss-btn');
@@ -2389,7 +2389,7 @@
     function closeSettingsModal() {
       document.getElementById('settings-modal').style.display = 'none';
     }
-    // Override ⚙️ to open settings modal instead of setup wizard
+    // Override ?�️ to open settings modal instead of setup wizard
     document.getElementById('settings-btn').addEventListener('click', openSettingsModal);
     document.getElementById('settings-modal-close').addEventListener('click', closeSettingsModal);
     document.getElementById('settings-overlay').addEventListener('click', closeSettingsModal);
@@ -2405,35 +2405,35 @@
       });
     });
 
-    // 연결 탭 — URL 테스트 + 저장
+    // ?�결 ????URL ?�스??+ ?�??
     document.getElementById('cfg-test-btn').addEventListener('click', async () => {
       const url = document.getElementById('cfg-url').value.trim();
-      if (!url) { setCfgMsg('cfg-url-msg', 'URL을 입력하세요.', 'err'); return; }
-      setCfgMsg('cfg-url-msg', '테스트 중…', '');
+      if (!url) { setCfgMsg('cfg-url-msg', 'URL???�력?�세??', 'err'); return; }
+      setCfgMsg('cfg-url-msg', '?�스??중�?, '');
       try {
         const res = await fetch(`${url}?date=test&_=${Date.now()}`);
         const json = await res.json();
         if (json.error && !json.ok && !json.exists) throw new Error(json.error);
-        setCfgMsg('cfg-url-msg', '✅ 연결 성공!', 'ok');
-      } catch (e) { setCfgMsg('cfg-url-msg', '❌ 연결 실패. URL 또는 배포 설정을 확인하세요.', 'err'); }
+        setCfgMsg('cfg-url-msg', '???�결 ?�공!', 'ok');
+      } catch (e) { setCfgMsg('cfg-url-msg', '???�결 ?�패. URL ?�는 배포 ?�정???�인?�세??', 'err'); }
     });
     document.getElementById('cfg-save-url-btn').addEventListener('click', () => {
       const url = document.getElementById('cfg-url').value.trim();
       if (!url) return;
       scriptUrl = url; localStorage.setItem('planner_script_url', url);
       document.getElementById('sync-badge').classList.remove('no-sync');
-      setSyncStatus('ok', '✓ 연결됨');
-      setCfgMsg('cfg-url-msg', '✅ URL이 저장되었습니다.', 'ok');
+      setSyncStatus('ok', '???�결??);
+      setCfgMsg('cfg-url-msg', '??URL???�?�되?�습?�다.', 'ok');
     });
 
-    // 계정 탭 — 이름 + 이메일 저장 및 서버 등록
+    // 계정 ?????�름 + ?�메???�??�??�버 ?�록
     document.getElementById('cfg-acct-save-btn').addEventListener('click', async () => {
       const name = document.getElementById('cfg-name').value.trim();
       const email = document.getElementById('cfg-email').value.trim().toLowerCase();
-      if (!email || !email.includes('@')) { setCfgMsg('cfg-acct-msg', 'Gmail 주소를 입력하세요.', 'err'); return; }
+      if (!email || !email.includes('@')) { setCfgMsg('cfg-acct-msg', 'Gmail 주소�??�력?�세??', 'err'); return; }
       localStorage.setItem('planner_name', name);
       localStorage.setItem('planner_email', email);
-      // 이메일 알림 자동 등록
+      // ?�메???�림 ?�동 ?�록
       if (scriptUrl) {
         try {
           const res = await fetch(scriptUrl, {
@@ -2442,11 +2442,11 @@
             headers: { 'Content-Type': 'text/plain' }
           });
           const json = await res.json();
-          const msg = json.already ? '✅ 저장됨 (이미 등록된 이메일)' : '✅ 저장 및 알림 등록 완료!';
+          const msg = json.already ? '???�?�됨 (?��? ?�록???�메??' : '???�??�??�림 ?�록 ?�료!';
           setCfgMsg('cfg-acct-msg', msg, 'ok');
-        } catch (e) { setCfgMsg('cfg-acct-msg', '✅ 로컬 저장 완료 (서버 저장 실패)', 'ok'); }
+        } catch (e) { setCfgMsg('cfg-acct-msg', '??로컬 ?�???�료 (?�버 ?�???�패)', 'ok'); }
       } else {
-        setCfgMsg('cfg-acct-msg', '✅ 저장되었습니다 (Sheets 미연결).', 'ok');
+        setCfgMsg('cfg-acct-msg', '???�?�되?�습?�다 (Sheets 미연�?.', 'ok');
       }
     });
     function setCfgMsg(id, msg, cls) {
@@ -2458,7 +2458,7 @@
        SHARE MODAL
     ============================================================ */
     document.getElementById('share-btn').addEventListener('click', () => {
-      if (!scriptUrl) { showToast('먼저 Sheets를 연결해 주세요 (⚙️ 설정)'); return; }
+      if (!scriptUrl) { showToast('먼�? Sheets�??�결??주세??(?�️ ?�정)'); return; }
       document.getElementById('share-date-label').textContent = currentDate + ' (' + getWeekday(currentDate) + ')';
       document.getElementById('share-modal').style.display = 'block';
       document.getElementById('share-msg').textContent = '';
@@ -2470,11 +2470,11 @@
 
     document.getElementById('share-send-btn').addEventListener('click', async () => {
       const recipients = (getShareTagCtrl() || { getEmails: () => [] }).getEmails();
-      if (!recipients.length) { setModalMsg('share-msg', '수신자를 최소 1명 입력해 주세요.', 'err'); return; }
+      if (!recipients.length) { setModalMsg('share-msg', '?�신?��? 최소 1�??�력??주세??', 'err'); return; }
       const senderEmail = localStorage.getItem('planner_email') || '';
-      const senderName = localStorage.getItem('planner_name') || senderEmail || '익명';
+      const senderName = localStorage.getItem('planner_name') || senderEmail || '?�명';
       const plannerData = collectData();
-      setModalMsg('share-msg', '발송 중…', '');
+      setModalMsg('share-msg', '발송 중�?, '');
       try {
         const res = await fetch(scriptUrl, {
           method: 'POST',
@@ -2483,9 +2483,9 @@
         });
         const json = await res.json();
         if (json.error) throw new Error(json.error);
-        setModalMsg('share-msg', `✅ ${json.emailsSent}명에게 공유되었습니다!`, 'ok');
+        setModalMsg('share-msg', `??${json.emailsSent}명에�?공유?�었?�니??`, 'ok');
         setTimeout(closeShareModal, 2000);
-      } catch (e) { setModalMsg('share-msg', `❌ ${e.message}`, 'err'); }
+      } catch (e) { setModalMsg('share-msg', `??${e.message}`, 'err'); }
     });
 
     function setModalMsg(id, msg, cls) {
@@ -2497,7 +2497,7 @@
        NOTICE BOARD
     ============================================================ */
 
-    // 공지 불러오기 (10분마다 자동 갱신)
+    // 공�? 불러?�기 (10분마???�동 갱신)
     async function fetchNotice() {
       if (!scriptUrl) return;
       try {
@@ -2516,11 +2516,11 @@
             const item = document.createElement('div');
             item.innerHTML = `
               <div class="notice-title" style="font-size:.85rem; font-weight:700; color:var(--text); display:flex; justify-content:space-between; cursor:pointer; padding: 10px; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:5px;">
-                <span style="display:flex; gap:6px; align-items:center;">📢 ${n.title}</span>
+                <span style="display:flex; gap:6px; align-items:center;">?�� ${n.title}</span>
                 <span style="font-size:.7rem; color:var(--text-muted);">${n.date}</span>
               </div>
               <div class="notice-content-body" style="display:none; padding:12px 14px; background: linear-gradient(135deg, rgba(232, 131, 74, .08), rgba(240, 192, 74, .05)); border: 1px solid rgba(232, 131, 74, .2); border-radius: var(--radius-sm); margin-bottom: 10px; font-size:.82rem; color:var(--text); line-height:1.7; white-space:pre-wrap;">${n.content}
-<div style="font-size:.68rem; color:var(--text-dim); margin-top:10px; text-align:right;">— ${n.author} (${n.updatedAt})</div>
+<div style="font-size:.68rem; color:var(--text-dim); margin-top:10px; text-align:right;">??${n.author} (${n.updatedAt})</div>
               </div>
             `;
             item.querySelector('.notice-title').addEventListener('click', function () {
@@ -2531,12 +2531,12 @@
           });
           if (dot) dot.style.display = 'inline-block';
         } else {
-          if (container) container.innerHTML = '<div class="notice-text">공지사항이 없습니다.</div>';
+          if (container) container.innerHTML = '<div class="notice-text">공�??�항???�습?�다.</div>';
           if (dot) dot.style.display = 'none';
         }
-      } catch (e) { /* 오프라인 무시 */ }
+      } catch (e) { /* ?�프?�인 무시 */ }
     }
-    // 10분마다 갱신
+    // 10분마??갱신
     setInterval(fetchNotice, 10 * 60 * 1000);
 
     function setNoticeMsg(msg, cls) {
@@ -2544,16 +2544,16 @@
       el.textContent = msg; el.className = 'notice-msg ' + cls;
     }
 
-    // 이메일 등록
+    // ?�메???�록
     document.getElementById('email-register-btn').addEventListener('click', async () => {
       if (!scriptUrl) {
-        setEmailMsg('먼저 Google Sheets를 연결하세요.', 'err'); return;
+        setEmailMsg('먼�? Google Sheets�??�결?�세??', 'err'); return;
       }
       const email = document.getElementById('user-email-input').value.trim().toLowerCase();
       if (!email || !email.includes('@gmail.com')) {
-        setEmailMsg('Gmail 주소(@gmail.com)를 입력해 주세요.', 'err'); return;
+        setEmailMsg('Gmail 주소(@gmail.com)�??�력??주세??', 'err'); return;
       }
-      setEmailMsg('등록 중…', '');
+      setEmailMsg('?�록 중�?, '');
       try {
         const res = await fetch(scriptUrl, {
           method: 'POST',
@@ -2563,17 +2563,17 @@
         const json = await res.json();
         if (json.error) throw new Error(json.error);
         if (json.already) {
-          setEmailMsg('✅ 이미 등록된 이메일입니다.', 'ok');
+          setEmailMsg('???��? ?�록???�메?�입?�다.', 'ok');
         } else {
-          setEmailMsg('✅ 등록 완료! 새 공지가 오면 이메일로 알림을 드립니다.', 'ok');
+          setEmailMsg('???�록 ?�료! ??공�?가 ?�면 ?�메?�로 ?�림???�립?�다.', 'ok');
           localStorage.setItem('planner_email', email);
         }
       } catch (e) {
-        setEmailMsg('❌ 등록 실패: ' + e.message, 'err');
+        setEmailMsg('???�록 ?�패: ' + e.message, 'err');
       }
     });
 
-    // 저장된 이메일 자동 채우기
+    // ?�?�된 ?�메???�동 채우�?
     const savedEmail = localStorage.getItem('planner_email');
     if (savedEmail) document.getElementById('user-email-input').value = savedEmail;
 
@@ -2592,7 +2592,7 @@
     // Update sync badge based on saved URL
     if (scriptUrl) {
       document.getElementById('sync-badge').classList.remove('no-sync');
-      setSyncStatus('ok', '✓ 연결됨');
+      setSyncStatus('ok', '???�결??);
     }
 
     buildPriorities();
@@ -2607,7 +2607,7 @@
       document.getElementById('date-input').value = currentDate;
       document.getElementById('date-weekday').textContent = getWeekday(currentDate);
       loadPage(currentDate);
-      fetchNotice(); // 공지 로드
+      fetchNotice(); // 공�? 로드
     }
   </script>
 
