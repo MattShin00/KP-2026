@@ -1911,7 +1911,7 @@
       isSyncing = true;
       setSyncStatus('busy', '저장 중…');
       try {
-        const payload = { date, ...data };
+        const payload = { action: 'savePlanner', date, ...data };
         await fetch(scriptUrl, {
           method: 'POST',
           body: JSON.stringify(payload),
