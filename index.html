@@ -37,7 +37,7 @@
       --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       --am-color: #f0c04a;
       --pm-color: #e8834a;
-      --sync-ok: #4ade80;
+      --sync-ok: #f0c04a;
       --sync-busy: #f0c04a;
       --sync-off: #7a7f9a;
     }
@@ -357,6 +357,7 @@
     .sync-badge {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
       padding: 5px 10px;
       border-radius: 20px;
@@ -366,6 +367,7 @@
       color: var(--text-muted);
       background: var(--glass);
       white-space: nowrap;
+      min-width: 85px;
     }
 
     .sync-dot {
