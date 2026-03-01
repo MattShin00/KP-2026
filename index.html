@@ -588,6 +588,11 @@
       flex-shrink: 0;
     }
 
+    .time-input-cell {
+      border-right: 1px solid var(--border);
+      position: relative;
+    }
+
     .toggle-thumb {
       position: absolute;
       top: 2px;
@@ -2641,6 +2646,7 @@
       try {
         const res = await fetch(`${scriptUrl}?action=getCalendarEvents&date=${date}&_=${Date.now()}`);
         const json = await res.json();
+        console.log('Calendar Response:', json);
 
         if (json.error) throw new Error(json.error);
 
@@ -2669,9 +2675,16 @@
           const startCellId = `time_${startRowH}_${startRowM}`;
           let cellInput = document.getElementById(startCellId);
 
-          if (!cellInput) return; // 해당 시간 칸 없음
+          if (!cellInput) {
+            console.warn('Can not find time cell:', startCellId);
+            return; // 해당 시간 칸 없음
+          }
 
           const cellContainer = cellInput.parentElement;
+          if (!cellContainer) {
+            console.warn('Can not find cell container:', startCellId);
+            return;
+          }
 
           const block = document.createElement('div');
           block.className = 'cal-event-block';
