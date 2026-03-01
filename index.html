@@ -392,18 +392,42 @@
     }
 
     .sync-badge.no-sync {
-      opacity: .4;
+      display: none !important;
+    }
+
+    /* 캘린더 동기화 전용 뱃지 스타일 추가 */
+    #sync-cal-badge {
+      background: rgba(100, 150, 255, 0.1);
+      border-color: rgba(100, 150, 255, 0.2);
+    }
+
+    #sync-cal-badge.ok .sync-dot {
+      background: rgb(100, 150, 255);
+    }
+
+    #sync-cal-badge.busy .sync-dot {
+      background: rgb(100, 150, 255);
+      animation: pulse 1s infinite;
+    }
+
+    #sync-cal-badge.off .sync-dot {
+      background: var(--sync-off);
     }
 
     @keyframes pulse {
-
-      0%,
-      100% {
+      0% {
         opacity: 1;
+        transform: scale(1);
       }
 
       50% {
-        opacity: .4;
+        opacity: 0.5;
+        transform: scale(1.4);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1);
       }
     }
 
@@ -1633,6 +1657,11 @@
       </div>
 
       <div class="header-actions">
+        <!-- Calendar Sync badge -->
+        <div class="sync-badge no-sync" id="sync-cal-badge" title="구글 캘린더 동기화" style="cursor:pointer;">
+          <div class="sync-dot"></div>
+          <span id="sync-cal-label">📅 캘린더</span>
+        </div>
         <!-- Sync badge -->
         <div class="sync-badge no-sync" id="sync-badge" title="클릭하면 지금 동기화" style="cursor:pointer;" id="sync-badge">
           <div class="sync-dot"></div>
@@ -1919,7 +1948,7 @@
           body: JSON.stringify(payload),
           headers: { 'Content-Type': 'text/plain' }
         });
-        setSyncStatus('ok', '✓ 동기화됨');
+        setSyncStatus('ok', '✓ 동기화');
       } catch (e) {
         setSyncStatus('off', '⚡ 오프라인');
       }
@@ -2035,17 +2064,28 @@
       return rt >= lt;
     }
 
-    async function loadPage(date) {
+    async function loadPage(date, isInitialLoad = false) {
       const local = loadLocal(date);
-      applyData(local);
+      applyData(local); // fast render
       const remote = await pullFromSheets(date);
-      if (shouldUseRemote(remote, local)) {
+
+      // ✅ 새로고침/접속 시 무조건 Sheets 원본 최신 데이터를 덮어쓰도록 수정 (로컬보다 우선)
+      if (isInitialLoad && remote && !isDataEmpty(remote)) {
+        saveLocal(date, remote);
+        applyData(remote);
+      } else if (shouldUseRemote(remote, local)) {
         saveLocal(date, remote);
         applyData(remote);
       } else if (remote && !isDataEmpty(local)) {
         // 로컬이 더 최신이고 텅 비어있지 않은 경우에만 로컬을 Sheets에 push
         clearTimeout(pendingPush);
         pushToSheets(date, local);
+      }
+
+      // Load Calendar if setup is complete
+      if (scriptUrl) {
+        document.getElementById('sync-cal-badge').classList.remove('no-sync');
+        syncCalendar(date);
       }
     }
 
@@ -2167,7 +2207,7 @@
       const remote = await pullFromSheets(currentDate);
       if (shouldUseRemote(remote, local)) {
         saveLocal(currentDate, remote); applyData(remote); updateStats(); updateProgress();
-        showToast('✓ Sheets 최신 데이터로 동기화됨');
+        showToast('✓ Sheets 최신 데이터로 동기화');
       } else if (remote && !isDataEmpty(local)) {
         const data = collectData();
         data._localModified = local._localModified;
@@ -2193,7 +2233,7 @@
       if (shouldUseRemote(remote, local)) {
         saveLocal(currentDate, remote);
         applyData(remote); updateStats(); updateProgress();
-        setSyncStatus('ok', '✓ 동기화됨');
+        setSyncStatus('ok', '✓ 동기화');
       } else if (remote && !isDataEmpty(local)) {
         const data = collectData();
         data._localModified = local._localModified;
@@ -2210,7 +2250,7 @@
       if (shouldUseRemote(remote, local)) {
         saveLocal(currentDate, remote);
         applyData(remote); updateStats(); updateProgress();
-        setSyncStatus('ok', '✓ 동기화됨');
+        setSyncStatus('ok', '✓ 동기화');
       } else if (remote && !isDataEmpty(local)) {
         const data = collectData();
         data._localModified = local._localModified;
@@ -2422,7 +2462,7 @@
       if (!url) return;
       scriptUrl = url; localStorage.setItem('planner_script_url', url);
       document.getElementById('sync-badge').classList.remove('no-sync');
-      setSyncStatus('ok', '✓ 연결됨');
+      setSyncStatus('ok', '✓ 동기화');
       setCfgMsg('cfg-url-msg', '✅ URL이 저장되었습니다.', 'ok');
     });
 
@@ -2583,6 +2623,117 @@
     }
 
     /* ============================================================
+       GOOGLE CALENDAR SYNC
+    ============================================================ */
+    async function syncCalendar(date) {
+      if (!scriptUrl) {
+        showToast('먼저 Google Sheets를 연결해 주세요.');
+        return;
+      }
+
+      const calBadge = document.getElementById('sync-cal-badge');
+      if (calBadge) {
+        calBadge.classList.remove('off', 'ok');
+        calBadge.classList.add('busy');
+      }
+      showToast('🔄 캘린더 연동 중...');
+
+      try {
+        const res = await fetch(`${scriptUrl}?action=getCalendarEvents&date=${date}&_=${Date.now()}`);
+        const json = await res.json();
+
+        if (json.error) throw new Error(json.error);
+
+        // 시간 블록 초기화 (기존 캘린더 이벤트 제거)
+        document.querySelectorAll('.cal-event-block').forEach(el => el.remove());
+
+        const events = json.events || [];
+
+        events.forEach(ev => {
+          if (ev.isAllDayEvent) {
+            // 종일 일정은 어떻게 처리할지 (일단 생략 또는 상단 표시)
+            // 간단하게 두 번째 열 가장 위나 상단 영역에 표시할 수도 있습니다.
+            // 여기서는 생략합니다.
+            return;
+          }
+
+          const [sh, sm] = ev.startTime.split(':').map(Number);
+          const [eh, em] = ev.endTime.split(':').map(Number);
+
+          if (eh < 5 || sh > 23) return; // 표시 가능 범위를 벗어남
+
+          let startRowH = sh < 5 ? 5 : sh;
+          let startRowM = sh < 5 ? 0 : (sm < 30 ? 0 : 30);
+
+          // 시작 블록 요소를 찾습니다.
+          const startCellId = `time_${startRowH}_${startRowM}`;
+          let cellInput = document.getElementById(startCellId);
+
+          if (!cellInput) return; // 해당 시간 칸 없음
+
+          const cellContainer = cellInput.parentElement;
+
+          const block = document.createElement('div');
+          block.className = 'cal-event-block';
+          if (ev.color) {
+            // 커스텀 색상이 있을 경우 좀 투명하게 적용
+            // block.style.borderLeftColor = ev.color;
+            // block.style.background = ev.color + '22'; 
+          }
+
+          block.innerHTML = `
+            <div class="cal-event-title">${ev.title}</div>
+            <div class="cal-event-time">${ev.startTime} - ${ev.endTime}</div>
+          `;
+
+          // 시작 시간 칸부터 종료 시간 칸까지 걸치는 높이 계산
+          // 1칸은 30분
+          const startMins = startRowH * 60 + startRowM;
+          const endMins = (eh * 60 + em) > (24 * 60) ? (24 * 60) : (eh * 60 + em);
+          let durationMins = endMins - startMins;
+
+          if (durationMins <= 0) durationMins = 30; // 최소 30분
+
+          // Row height is ~48px (min-height). Calculate roughly.
+          // In a real grid, setting row-span or precise absolute height is better.
+          // We will use precise absolute height based on % or px if needed, 
+          // For simplicity, we assume each 30min slot is physically 48px + 1px border.
+          const slotHeightPx = 49;
+          const heightMultiplier = durationMins / 30;
+          block.style.height = `calc(${heightMultiplier * 100}% + ${(heightMultiplier - 1)}px)`; // 대략적인 계산
+
+          // 우측 빈 칸(cell2)에 추가하여 사용자가 입력하는 왼쪽 칸(cell1)을 가리지 않게 함.
+          const cell2 = cellContainer.nextElementSibling;
+          if (cell2 && cell2.classList.contains('time-input-cell')) {
+            cell2.appendChild(block);
+          } else {
+            cellContainer.appendChild(block);
+          }
+        });
+
+        if (calBadge) {
+          calBadge.classList.remove('busy');
+          calBadge.classList.add('ok');
+        }
+        showToast('✅ 캘린더 동기화 완료!');
+
+      } catch (e) {
+        console.error(e);
+        if (calBadge) {
+          calBadge.classList.remove('busy', 'ok');
+          calBadge.classList.add('off');
+        }
+        showToast('❌ 캘린더 동기화 실패');
+      }
+    }
+
+    if (document.getElementById('sync-cal-badge')) {
+      document.getElementById('sync-cal-badge').addEventListener('click', () => {
+        syncCalendar(currentDate);
+      });
+    }
+
+    /* ============================================================
        INIT
     ============================================================ */
 
@@ -2592,7 +2743,7 @@
     // Update sync badge based on saved URL
     if (scriptUrl) {
       document.getElementById('sync-badge').classList.remove('no-sync');
-      setSyncStatus('ok', '✓ 연결됨');
+      setSyncStatus('ok', '✓ 동기화');
     }
 
     buildPriorities();
@@ -2606,7 +2757,7 @@
       closeSetup();
       document.getElementById('date-input').value = currentDate;
       document.getElementById('date-weekday').textContent = getWeekday(currentDate);
-      loadPage(currentDate);
+      loadPage(currentDate, true); // 초기 로드: 무조건 서버 데이터 우선
       fetchNotice(); // 공지 로드
     }
   </script>
