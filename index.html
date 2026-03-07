@@ -865,7 +865,7 @@
       align-items: flex-start;
       gap: 8px;
       border-radius: 6px;
-      padding: 3px 4px;
+      padding: 1px 4px;
       transition: background .15s;
     }
 
@@ -911,9 +911,9 @@
       color: var(--text);
       font-family: 'Inter', sans-serif;
       font-size: .82rem;
-      line-height: 1.8;
+      line-height: 1.4;
       resize: none;
-      min-height: 26px;
+      min-height: 20px;
       padding: 0;
       width: 1px;
       /* flex stretch trick */
@@ -2605,6 +2605,38 @@
             prevTa.selectionStart = prevTa.selectionEnd = prevTa.value.length;
           }
           serializeBd(); scheduleSave();
+        }
+      });
+      ta.addEventListener('paste', e => {
+        const pasteText = (e.clipboardData || window.clipboardData).getData('text');
+        if (pasteText.includes('\n') || pasteText.includes('\r')) {
+          e.preventDefault();
+          const lines = pasteText.split(/\r?\n/).filter(line => line.trim() !== '');
+          if (lines.length > 0) {
+            // 현재 입력창에 첫 줄 삽입
+            const cursorStart = ta.selectionStart;
+            const cursorEnd = ta.selectionEnd;
+            const textBefore = ta.value.substring(0, cursorStart);
+            const textAfter = ta.value.substring(cursorEnd);
+            ta.value = textBefore + lines[0] + textAfter;
+
+            // 나머지 줄은 새 항목으로 추가
+            let currentItem = item;
+            for (let i = 1; i < lines.length; i++) {
+              const newItem = addBdItem(list, lines[i], false, false);
+              // item 뒤에 계속 끼워넣기 (nextElementSibling 기준)
+              if (currentItem.nextElementSibling && currentItem.nextElementSibling !== list.querySelector('.bd-add-row')) {
+                list.insertBefore(newItem, currentItem.nextElementSibling);
+              } else {
+                list.insertBefore(newItem, list.querySelector('.bd-add-row'));
+              }
+              currentItem = newItem;
+            }
+            currentItem.querySelector('.bd-text').focus(); // 마지막 삽입 항목에 포커스
+            ta.style.height = 'auto';
+            ta.style.height = ta.scrollHeight + 'px';
+            serializeBd(); scheduleSave();
+          }
         }
       });
 
