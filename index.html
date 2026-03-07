@@ -957,6 +957,45 @@
       color: var(--text-dim);
     }
 
+    /* ===== PAST DATE LOCK ===== */
+    .locked-banner {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 12px;
+      background: rgba(232, 131, 74, .1);
+      border: 1px solid rgba(232, 131, 74, .25);
+      border-radius: var(--radius-sm);
+      font-size: .72rem;
+      color: var(--accent2);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .priority-input:read-only {
+      cursor: not-allowed;
+      opacity: .6;
+      user-select: none;
+    }
+
+    .priority-item--locked {
+      pointer-events: none;
+      opacity: .65;
+    }
+
+    .bd-list--locked .bd-text {
+      cursor: not-allowed;
+    }
+
+    .bd-list--locked .bd-cb {
+      pointer-events: none;
+      opacity: .55;
+    }
+
+    .bd-list--locked .bd-add-row {
+      display: none;
+    }
+
     .stats-grid {
       padding: 12px 16px;
       display: grid;
@@ -1857,9 +1896,13 @@
         </div>
 
         <div class="card">
-          <div class="card-header">
-            <span class="card-title">Brain Dump</span>
-            <span style="font-size:.68rem;color:var(--text-muted)">자유롭게 쏟아내기</span>
+          <div class="card-header" style="justify-content: space-between; display: flex; align-items: center;">
+            <div>
+              <span class="card-title">Brain Dump</span>
+              <span style="font-size:.68rem;color:var(--text-muted); margin-left:8px;">자유롭게 쏟아내기</span>
+            </div>
+            <button class="icon-btn" id="copy-bd-btn" title="전체 복사"
+              style="font-size:.9rem; padding:4px; height:auto; line-height:1;">📋</button>
           </div>
           <div class="brain-dump-body">
             <!-- 체크박스 리스트 렌더러 -->
@@ -2335,6 +2378,58 @@
         document.getElementById('sync-cal-badge').classList.remove('no-sync');
         syncCalendar(date);
       }
+
+      // 과거 날짜 잎금 적용
+      applyReadonlyState(date);
+    }
+
+    function applyReadonlyState(date) {
+      const isPast = date < todayStr();
+
+      // --- Top Priority ---
+      for (let i = 0; i < 3; i++) {
+        const inp = document.getElementById(`priority-${i}`);
+        const item = document.querySelector(`.priority-item[data-idx="${i}"]`);
+        if (inp) inp.readOnly = isPast;
+        if (item) item.classList.toggle('priority-item--locked', isPast);
+      }
+
+      // Priority 잠금 배너
+      const priList = document.getElementById('priorities-list');
+      let priBanner = document.getElementById('priority-lock-banner');
+      if (isPast) {
+        if (!priBanner) {
+          priBanner = document.createElement('div');
+          priBanner.id = 'priority-lock-banner';
+          priBanner.className = 'locked-banner';
+          priBanner.innerHTML = '🔒 과거 날짜는 수정할 수 없습니다';
+          priList.parentElement.insertBefore(priBanner, priList);
+        }
+      } else {
+        if (priBanner) priBanner.remove();
+      }
+
+      // --- Brain Dump ---
+      const bdList = document.getElementById('bd-list');
+      if (bdList) bdList.classList.toggle('bd-list--locked', isPast);
+      document.querySelectorAll('#bd-list .bd-text').forEach(t => {
+        t.readOnly = isPast;
+      });
+
+      // BD 잠금 배너
+      const bdBody = document.querySelector('.brain-dump-body');
+      let bdBanner = document.getElementById('bd-lock-banner');
+      if (isPast) {
+        if (!bdBanner && bdBody) {
+          bdBanner = document.createElement('div');
+          bdBanner.id = 'bd-lock-banner';
+          bdBanner.className = 'locked-banner';
+          bdBanner.innerHTML = '🔒 과거 날짜는 수정할 수 없습니다';
+          bdBody.insertBefore(bdBanner, bdBody.firstChild);
+        }
+      } else {
+        if (bdBanner) bdBanner.remove();
+      }
     }
 
     function collectData() {
@@ -2357,12 +2452,27 @@
 
     function scheduleSave() {
       const date = currentDate;
+      const isPast = date < todayStr();
       const data = collectData();
       data._localModified = new Date().toISOString();
       lastLocalActivity = Date.now();
-      saveLocal(date, data);
-      clearTimeout(pendingPush);
-      pendingPush = setTimeout(() => pushToSheets(date, data), 1000); // 1초 디바운스 (즐시 push)
+
+      if (isPast) {
+        // 과거 날짜: 시간테이블만 저장, Priority/BD는 기존 값 유지
+        const existing = loadLocal(date) || {};
+        const safeData = Object.assign({}, existing);
+        HOURS.forEach(h => {
+          [0, 30].forEach(min => { safeData[`t${h}_${min}`] = data[`t${h}_${min}`]; });
+        });
+        safeData._localModified = data._localModified;
+        saveLocal(date, safeData);
+        clearTimeout(pendingPush);
+        pendingPush = setTimeout(() => pushToSheets(date, safeData), 1000);
+      } else {
+        saveLocal(date, data);
+        clearTimeout(pendingPush);
+        pendingPush = setTimeout(() => pushToSheets(date, data), 1000);
+      }
     }
 
     /* ============================================================
@@ -2518,6 +2628,30 @@
       });
       list.appendChild(row);
     }
+
+    // Brain Dump 복사 기능
+    document.getElementById('copy-bd-btn').addEventListener('click', () => {
+      const items = document.querySelectorAll('#bd-list .bd-item');
+      if (items.length === 0) {
+        showToast('복사할 내용이 없습니다.');
+        return;
+      }
+      const lines = [];
+      items.forEach(item => {
+        const text = item.querySelector('.bd-text').value;
+        if (text.trim()) lines.push(text.trim());
+      });
+      const content = lines.join('\n');
+      if (!content) {
+        showToast('복사할 내용이 없습니다.');
+        return;
+      }
+      navigator.clipboard.writeText(content).then(() => {
+        showToast('📋 Brain Dump 내용이 복사되었습니다.');
+      }).catch(err => {
+        showToast('❌ 복사 실패');
+      });
+    });
 
     /* ============================================================
        KEYBOARD ARROW NAVIGATION
