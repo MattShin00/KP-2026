@@ -2483,7 +2483,7 @@
           newItem.querySelector('.bd-text').focus();
           addBdAddRow(list);
           scheduleSave();
-        } else if (e.key === 'Backspace' && ta.value === '') {
+        } else if ((e.key === 'Backspace' || e.key === 'Delete') && ta.value === '') {
           e.preventDefault();
           const prev = item.previousElementSibling;
           item.remove();
