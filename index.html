@@ -839,6 +839,124 @@
       color: var(--text-dim);
     }
 
+    /* ===== BRAIN DUMP CHECKLIST ===== */
+    .bd-list {
+      width: 100%;
+      min-height: 240px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 10px 10px 8px;
+      background-image: radial-gradient(circle, var(--surface3) 1px, transparent 1px);
+      background-size: 18px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: border-color .2s;
+    }
+
+    .bd-list:focus-within {
+      border-color: rgba(240, 192, 74, .3);
+      box-shadow: 0 0 0 3px rgba(240, 192, 74, .06);
+    }
+
+    .bd-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      border-radius: 6px;
+      padding: 3px 4px;
+      transition: background .15s;
+    }
+
+    .bd-item:hover {
+      background: var(--glass);
+    }
+
+    .bd-cb {
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      border-radius: 4px;
+      border: 2px solid var(--border-hover);
+      background: transparent;
+      cursor: pointer;
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      color: #0d0f1a;
+      flex-shrink: 0;
+      transition: background .15s, border-color .15s;
+      user-select: none;
+    }
+
+    .bd-cb:hover {
+      border-color: var(--accent);
+      background: rgba(240, 192, 74, .1);
+    }
+
+    .bd-cb.checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .bd-text {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: .82rem;
+      line-height: 1.8;
+      resize: none;
+      min-height: 26px;
+      padding: 0;
+      width: 1px;
+      /* flex stretch trick */
+    }
+
+    .bd-text::placeholder {
+      color: var(--text-dim);
+    }
+
+    .bd-item.checked .bd-text {
+      text-decoration: line-through;
+      opacity: .45;
+    }
+
+    .bd-add-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 3px 4px;
+      margin-top: 2px;
+      opacity: .5;
+      cursor: text;
+    }
+
+    .bd-add-icon {
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      border-radius: 4px;
+      border: 2px dashed var(--border-hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .bd-add-label {
+      font-size: .78rem;
+      color: var(--text-dim);
+    }
+
     .stats-grid {
       padding: 12px 16px;
       display: grid;
@@ -1744,7 +1862,10 @@
             <span style="font-size:.68rem;color:var(--text-muted)">자유롭게 쏟아내기</span>
           </div>
           <div class="brain-dump-body">
-            <textarea id="brain-dump" placeholder="머릿속에 있는 것들을 전부 적어보세요.&#10;아이디어, 걱정, 할 일, 떠오르는 생각..."></textarea>
+            <!-- 체크박스 리스트 렌더러 -->
+            <div class="bd-list" id="bd-list"></div>
+            <!-- 데이터 저장용 숨겨진 textarea (서버 호환) -->
+            <textarea id="brain-dump" style="display:none;"></textarea>
           </div>
         </div>
 
@@ -2145,7 +2266,9 @@
         chk.classList.toggle('checked', checked);
         item.classList.toggle('completed', checked);
       }
-      document.getElementById('brain-dump').value = data.brainDump || '';
+      const bdVal = data.brainDump || '';
+      document.getElementById('brain-dump').value = bdVal;
+      renderBdList(bdVal);
       HOURS.forEach(h => {
         [0, 30].forEach(min => {
           const inp = document.getElementById(`time_${h}_${min}`);
@@ -2282,24 +2405,119 @@
       e.target.classList.toggle('has-content', !!e.target.value.trim());
       updateStats(); scheduleSave();
     }
-    const brainDumpEl = document.getElementById('brain-dump');
-    brainDumpEl.addEventListener('input', scheduleSave);
-    brainDumpEl.addEventListener('focus', function () {
-      if (this.value === '') {
-        this.value = '• ';
-      }
-    });
-    brainDumpEl.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const start = this.selectionStart;
-        const end = this.selectionEnd;
-        const text = this.value;
-        this.value = text.substring(0, start) + '\n• ' + text.substring(end);
-        this.selectionStart = this.selectionEnd = start + 3;
-        scheduleSave();
-      }
-    });
+    /* ============================================================
+       BRAIN DUMP CHECKLIST
+    ============================================================ */
+    const BD_CHECKED_PREFIX = '[x] ';
+    const BD_UNCHECKED_PREFIX = '[ ] ';
+
+    // 저장된 텍스트 → 체크리스트 파싱
+    function parseBdLines(text) {
+      if (!text || !text.trim()) return [];
+      return text.split('\n').map(line => {
+        if (line.startsWith(BD_CHECKED_PREFIX)) {
+          return { text: line.slice(BD_CHECKED_PREFIX.length), checked: true };
+        } else if (line.startsWith(BD_UNCHECKED_PREFIX)) {
+          return { text: line.slice(BD_UNCHECKED_PREFIX.length), checked: false };
+        } else {
+          // 기존 '• ' 형식 또는 일반 텍스트 마이그레이션
+          const t = line.startsWith('\u2022 ') ? line.slice(2) : line;
+          return { text: t, checked: false };
+        }
+      }).filter(l => l.text.trim() !== '');
+    }
+
+    // 체크리스트 → 저장 텍스트 직렬화
+    function serializeBd() {
+      const items = document.querySelectorAll('#bd-list .bd-item');
+      const lines = [];
+      items.forEach(item => {
+        const checked = item.classList.contains('checked');
+        const text = item.querySelector('.bd-text').value;
+        if (text.trim()) lines.push((checked ? BD_CHECKED_PREFIX : BD_UNCHECKED_PREFIX) + text);
+      });
+      document.getElementById('brain-dump').value = lines.join('\n');
+    }
+
+    // 체크리스트 DOM 생성
+    function renderBdList(text) {
+      const list = document.getElementById('bd-list');
+      list.innerHTML = '';
+      const lines = parseBdLines(text);
+      (lines.length ? lines : [{ text: '', checked: false }]).forEach((l, idx) => {
+        addBdItem(list, l.text, l.checked, idx === 0 && lines.length === 0);
+      });
+      addBdAddRow(list);
+    }
+
+    function addBdItem(list, text, checked, autofocus) {
+      const addRow = list.querySelector('.bd-add-row');
+      const item = document.createElement('div');
+      item.className = 'bd-item' + (checked ? ' checked' : '');
+
+      const cb = document.createElement('div');
+      cb.className = 'bd-cb' + (checked ? ' checked' : '');
+      if (checked) cb.textContent = '\u2713';
+      cb.addEventListener('click', () => {
+        const isChecked = item.classList.toggle('checked');
+        cb.classList.toggle('checked', isChecked);
+        cb.textContent = isChecked ? '\u2713' : '';
+        serializeBd(); scheduleSave();
+      });
+
+      const ta = document.createElement('textarea');
+      ta.className = 'bd-text';
+      ta.rows = 1;
+      ta.value = text;
+      ta.placeholder = '항목 입력...';
+      ta.addEventListener('input', () => {
+        ta.style.height = 'auto';
+        ta.style.height = ta.scrollHeight + 'px';
+        serializeBd(); scheduleSave();
+      });
+      ta.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          serializeBd();
+          const newItem = addBdItem(list, '', false, false);
+          newItem.querySelector('.bd-text').focus();
+          addBdAddRow(list);
+          scheduleSave();
+        } else if (e.key === 'Backspace' && ta.value === '') {
+          e.preventDefault();
+          const prev = item.previousElementSibling;
+          item.remove();
+          if (prev && prev.classList.contains('bd-item')) {
+            const prevTa = prev.querySelector('.bd-text');
+            prevTa.focus();
+            prevTa.selectionStart = prevTa.selectionEnd = prevTa.value.length;
+          }
+          serializeBd(); scheduleSave();
+        }
+      });
+
+      if (autofocus) setTimeout(() => ta.focus(), 50);
+
+      item.appendChild(cb);
+      item.appendChild(ta);
+      if (addRow) list.insertBefore(item, addRow);
+      else list.appendChild(item);
+      return item;
+    }
+
+    function addBdAddRow(list) {
+      // remove existing add-row
+      list.querySelectorAll('.bd-add-row').forEach(r => r.remove());
+      const row = document.createElement('div');
+      row.className = 'bd-add-row';
+      row.innerHTML = '<div class="bd-add-icon">+</div><span class="bd-add-label">새 항목 추가</span>';
+      row.addEventListener('click', () => {
+        const item = addBdItem(list, '', false, false);
+        item.querySelector('.bd-text').focus();
+        addBdAddRow(list);
+      });
+      list.appendChild(row);
+    }
 
     /* Date nav */
     function setDate(date) {
@@ -2881,6 +3099,7 @@
 
     buildPriorities();
     buildTimeblocks();
+    renderBdList(''); // Brain Dump 초기 체크리스트 렌더
 
     // Show setup wizard if no URL yet, otherwise show planner
     if (!scriptUrl && !localStorage.getItem('planner_setup_done')) {
