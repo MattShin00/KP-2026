@@ -2519,6 +2519,68 @@
       list.appendChild(row);
     }
 
+    /* ============================================================
+       KEYBOARD ARROW NAVIGATION
+       ↑/↓ 키로 Top Priority → Brain Dump → 시간테이블 이동
+    ============================================================ */
+    function getNavTargets() {
+      const targets = [];
+      for (let i = 0; i < 3; i++) {
+        const el = document.getElementById(`priority-${i}`);
+        if (el) targets.push(el);
+      }
+      document.querySelectorAll('#bd-list .bd-item .bd-text').forEach(el => targets.push(el));
+      for (let h = 5; h <= 23; h++) {
+        [0, 30].forEach(min => {
+          const el = document.getElementById(`time_${h}_${min}`);
+          if (el) targets.push(el);
+        });
+      }
+      return targets;
+    }
+
+    function isOnFirstLine(el) {
+      if (el.tagName === 'INPUT') return true;
+      return el.value.substring(0, el.selectionStart).indexOf('\n') === -1;
+    }
+
+    function isOnLastLine(el) {
+      if (el.tagName === 'INPUT') return true;
+      return el.value.substring(el.selectionEnd).indexOf('\n') === -1;
+    }
+
+    function navFocus(el, toEnd) {
+      el.focus();
+      const pos = toEnd ? el.value.length : 0;
+      el.selectionStart = el.selectionEnd = pos;
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+      const active = document.activeElement;
+      if (!active) return;
+      const isPriority = active.classList.contains('priority-input');
+      const isBdText = active.classList.contains('bd-text');
+      const isTimeInp = active.classList.contains('time-input');
+      if (!isPriority && !isBdText && !isTimeInp) return;
+
+      const targets = getNavTargets();
+      const idx = targets.indexOf(active);
+      if (idx === -1) return;
+
+      if (e.key === 'ArrowUp') {
+        if (!isOnFirstLine(active)) return;
+        if (idx === 0) return;
+        e.preventDefault();
+        navFocus(targets[idx - 1], true);
+      } else {
+        if (!isOnLastLine(active)) return;
+        if (idx === targets.length - 1) return;
+        e.preventDefault();
+        navFocus(targets[idx + 1], false);
+      }
+    });
+
     /* Date nav */
     function setDate(date) {
       // save current first
