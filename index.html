@@ -973,18 +973,20 @@
     }
 
     .priority-input:read-only {
-      cursor: not-allowed;
+      cursor: text;
       opacity: .6;
-      user-select: none;
     }
 
     .priority-item--locked {
-      pointer-events: none;
       opacity: .65;
     }
 
+    .priority-item--locked .priority-check {
+      pointer-events: none;
+    }
+
     .bd-list--locked .bd-text {
-      cursor: not-allowed;
+      cursor: text;
     }
 
     .bd-list--locked .bd-cb {
