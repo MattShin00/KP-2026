@@ -1859,7 +1859,7 @@
           <span id="sync-cal-label">📅 캘린더</span>
         </div>
         <!-- Sync badge -->
-        <div class="sync-badge no-sync" id="sync-badge" title="클릭하면 지금 동기화" style="cursor:pointer;" id="sync-badge">
+        <div class="sync-badge no-sync" id="sync-badge" title="클릭하면 지금 동기화" style="cursor:pointer;">
           <div class="sync-dot"></div>
           <span id="sync-label">오프라인</span>
         </div>
@@ -2640,7 +2640,14 @@
         }
       });
 
-      if (autofocus) setTimeout(() => ta.focus(), 50);
+      // 텍스트 영역 초기 렌더링 시 높이 자동 조절 (DOM에 추가된 후 진행)
+      if (autofocus) {
+        setTimeout(() => ta.focus(), 50);
+      }
+      setTimeout(() => {
+        ta.style.height = 'auto';
+        ta.style.height = ta.scrollHeight + 'px';
+      }, 0);
 
       item.appendChild(cb);
       item.appendChild(ta);
@@ -3057,7 +3064,7 @@
           const json = await res.json();
           const msg = json.already ? '✅ 저장됨 (이미 등록된 이메일)' : '✅ 저장 및 알림 등록 완료!';
           setCfgMsg('cfg-acct-msg', msg, 'ok');
-        } catch (e) { setCfgMsg('cfg-acct-msg', '✅ 로컬 저장 완료 (서버 저장 실패)', 'ok'); }
+        } catch (e) { setCfgMsg('cfg-acct-msg', '✅ 로컈 저장 완료 (서버 저장 실패)', 'ok'); }
       } else {
         setCfgMsg('cfg-acct-msg', '✅ 저장되었습니다 (Sheets 미연결).', 'ok');
       }
