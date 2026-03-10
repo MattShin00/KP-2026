@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 
 <head>
@@ -2005,6 +2005,13 @@
             <button class="btn-sm orange" id="cfg-save-url-btn">저장</button>
           </div>
           <div class="modal-msg" id="cfg-url-msg"></div>
+          <div class="form-row" style="margin-top:16px;">
+            <label class="form-label">📢 공지 URL <span style="color:var(--text-dim);font-weight:400;">(선택)</span></label>
+            <input class="form-input" id="cfg-notice-url" type="url" placeholder="아빠의 웹 앱 URL (공지 공유 시 입력)" />
+            <div class="form-hint">입력하면 이 URL의 공지사항을 이 앱에서 함께 표시합니다.</div>
+          </div>
+          <button class="btn-sm orange" id="cfg-save-notice-url-btn">📢 공지 URL 저장</button>
+          <div class="modal-msg" id="cfg-notice-url-msg"></div>
         </div>
         <!-- 계정 탭 -->
         <div class="modal-tab-content" id="tab-acct">
@@ -2091,6 +2098,7 @@
     ============================================================ */
     let currentDate = todayStr();
     let scriptUrl = localStorage.getItem('planner_script_url') || '';
+    let noticeUrl = localStorage.getItem('planner_notice_url') || '';
     let isSyncing = false;
     let pendingPush = null; // setTimeout id
 
@@ -3003,6 +3011,7 @@
     function openSettingsModal() {
       document.getElementById('settings-modal').style.display = 'block';
       document.getElementById('cfg-url').value = scriptUrl || '';
+      document.getElementById('cfg-notice-url').value = noticeUrl || '';
       document.getElementById('cfg-name').value = localStorage.getItem('planner_name') || '';
       document.getElementById('cfg-email').value = localStorage.getItem('planner_email') || '';
     }
@@ -3044,6 +3053,14 @@
       document.getElementById('sync-badge').classList.remove('no-sync');
       setSyncStatus('ok', '✓ 동기화');
       setCfgMsg('cfg-url-msg', '✅ URL이 저장되었습니다.', 'ok');
+    });
+    document.getElementById('cfg-save-notice-url-btn').addEventListener('click', () => {
+      const url = document.getElementById('cfg-notice-url').value.trim();
+      noticeUrl = url;
+      if (url) localStorage.setItem('planner_notice_url', url);
+      else localStorage.removeItem('planner_notice_url');
+      setCfgMsg('cfg-notice-url-msg', url ? '✅ 공지 URL이 저장되었습니다.' : '✅ 공지 URL이 제거되었습니다.', 'ok');
+      fetchNotice();
     });
 
     // 계정 탭 — 이름 + 이메일 저장 및 서버 등록
@@ -3119,9 +3136,10 @@
 
     // 공지 불러오기 (10분마다 자동 갱신)
     async function fetchNotice() {
-      if (!scriptUrl) return;
+      const nUrl = noticeUrl || scriptUrl;
+      if (!nUrl) return;
       try {
-        const res = await fetch(`${scriptUrl}?action=getNotice&_=${Date.now()}`);
+        const res = await fetch(`${nUrl}?action=getNotice&_=${Date.now()}`);
         const json = await res.json();
         if (json.error) return;
         const card = document.getElementById('notice-card');
