@@ -2400,6 +2400,9 @@
       const local = loadLocal(date);
       applyData(local); // fast render
       const remote = await pullFromSheets(date);
+      
+      // 통신 중 다른 날짜로 사용자가 이동을 눌렀다면 현재 백그라운드 결과 즉시 폐기
+      if (date !== currentDate) return;
 
       // ✅ 새로고침/접속 시 무조건 Sheets 원본 최신 데이터를 덮어쓰도록 수정 (로컬보다 우선)
       if (isInitialLoad && remote && !isDataEmpty(remote)) {
@@ -2824,58 +2827,82 @@
     document.getElementById('sync-badge').addEventListener('click', async () => {
       if (!scriptUrl) { showToast('먼저 Google Sheets를 연결하세요 (⚙️)'); return; }
       showToast('🔄 동기화 중...');
-      const local = loadLocal(currentDate);
-      const remote = await pullFromSheets(currentDate);
+      const reqDate = currentDate;
+      const local = loadLocal(reqDate);
+      const remote = await pullFromSheets(reqDate);
+      if (reqDate !== currentDate) return; // 날짜가 도중에 바뀌면 중단
+
       if (shouldUseRemote(remote, local)) {
-        saveLocal(currentDate, remote); applyData(remote); updateStats(); updateProgress();
+        saveLocal(reqDate, remote); applyData(remote); updateStats(); updateProgress();
         showToast('✓ Sheets 최신 데이터로 동기화');
       } else if (remote && !isDataEmpty(local)) {
         const data = collectData();
         data._localModified = local._localModified;
         clearTimeout(pendingPush);
-        pushToSheets(currentDate, data);
+        pushToSheets(reqDate, data);
         showToast('📤 로컬 최신 데이터를 Sheets에 업로드');
       } else {
         showToast('✓ 이 날짜 Sheets 데이터 없음 (로컬 유지)');
       }
     });
 
-    // ⏱️ 적응형 자동 동기화 (활성: 30초 / 휴식: 5분)
+    // ⏱️ 스마트 3단계 자동 동기화 (집중: 5초 / 관전: 30초 / 휴면: 30분)
     let lastAutoPull = 0;
     setInterval(async () => {
       if (!scriptUrl || isSyncing) return;
+      
       const now = Date.now();
-      const isActive = (now - lastLocalActivity) < 10 * 60 * 1000;
-      const interval = isActive ? 30 * 1000 : 5 * 60 * 1000;
+      const timeSinceLastActivity = now - lastLocalActivity;
+      
+      let interval;
+      if (timeSinceLastActivity < 1 * 60 * 1000) interval = 5 * 1000;                // 1분 내 활성: 5초 주기
+      else if (timeSinceLastActivity < 10 * 60 * 1000) interval = 30 * 1000;         // 1~10분 관전: 30초 주기
+      else interval = 30 * 60 * 1000;                                                // 10분 이상 휴면: 30분 주기
+      
       if ((now - lastAutoPull) < interval) return;
       lastAutoPull = now;
-      const local = loadLocal(currentDate);
-      const remote = await pullFromSheets(currentDate, true);
-      if (shouldUseRemote(remote, local)) {
-        saveLocal(currentDate, remote);
+      
+      const reqDate = currentDate;
+      const local = loadLocal(reqDate);
+      const remote = await pullFromSheets(reqDate, true);
+      if (reqDate !== currentDate) return; // 통신 중 사용자가 날짜를 변경했으면 폐기
+      
+      // ✅ 입력 중 덮어쓰기 방지: 현재 사용자가 텍스트 입력칸(input/textarea)에 집중 중이면 덮어쓰지 않음
+      const activeEl = document.activeElement;
+      const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+      
+      if (shouldUseRemote(remote, local) && !isTyping) {
+        saveLocal(reqDate, remote);
         applyData(remote); updateStats(); updateProgress();
         setSyncStatus('ok', '✓ 동기화');
       } else if (remote && !isDataEmpty(local)) {
+        // 로컬이 더 최신이거나, 사용자가 현재 입력 중이어서 덮어쓰기를 보류한 상태라면 즉시 서버로 Push 유도
         const data = collectData();
         data._localModified = local._localModified;
-        pushToSheets(currentDate, data);
+        pushToSheets(reqDate, data);
       }
-    }, 30 * 1000);
+    }, 5 * 1000); // 제일 짧은 간격(5초) 단위로 Timer 스핀업
 
     // 📲 모바일에서 앱으로 돌아올 때 자동 동기화
     async function syncOnFocus() {
       if (!scriptUrl) return;
       lastAutoPull = 0;
-      const local = loadLocal(currentDate);
-      const remote = await pullFromSheets(currentDate, true);
-      if (shouldUseRemote(remote, local)) {
-        saveLocal(currentDate, remote);
+      const reqDate = currentDate;
+      const local = loadLocal(reqDate);
+      const remote = await pullFromSheets(reqDate, true);
+      if (reqDate !== currentDate) return;
+      
+      const activeEl = document.activeElement;
+      const isTyping = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+
+      if (shouldUseRemote(remote, local) && !isTyping) {
+        saveLocal(reqDate, remote);
         applyData(remote); updateStats(); updateProgress();
         setSyncStatus('ok', '✓ 동기화');
       } else if (remote && !isDataEmpty(local)) {
         const data = collectData();
         data._localModified = local._localModified;
-        pushToSheets(currentDate, data);
+        pushToSheets(reqDate, data);
       }
     }
     document.addEventListener('visibilitychange', () => {
